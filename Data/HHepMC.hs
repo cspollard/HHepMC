@@ -17,21 +17,26 @@ import Data.Text (Text)
 
 import Data.Char (isSpace)
 
+import Control.Applicative ((<|>))
+
 -- just to make things easier...
 parseWithSpace :: Parser a -> Parser a
 parseWithSpace p = do
     x <- p
     skipSpace
 
+    return x
+
+
 parseList :: Int -> Parser a -> Parser [a]
 parseList n p = do
     count n (parseWithSpace p)
 
 dec :: Parser Int
-dec = parseWithSpace decimal
+dec = parseWithSpace (signed decimal)
 
 doub :: Parser Double
-doub = parseWithSpace double
+doub = parseWithSpace (signed double)
 
 
 type Version = Text
@@ -40,7 +45,10 @@ versionParser :: Parser Version
 versionParser = do
     string "HepMC::Version"
     skipSpace
-    takeTill isEndOfLine
+    x <- takeTill isEndOfLine
+    skipSpace
+
+    return $ trace "versionParser" $ x
 
 
 data EventInfo = EventInfo {
@@ -75,10 +83,10 @@ eventInfoParser = do
     let bpbcs = (bc1, bc2)
 
     nrs <- dec
-    rs <- parseList nrs decimal
+    rs <- parseList nrs (signed decimal)
 
     nevtwgts <- dec
-    evtwgts <- parseList nevtwgts decimal
+    evtwgts <- parseList nevtwgts $ (signed double)
 
     return (EventInfo en nmpi scale aqcd aqed spid spbc nvtx bpbcs nrs rs nevtwgts evtwgts)
 
@@ -89,13 +97,12 @@ weightNamesParser :: Parser WeightNames
 weightNamesParser = do
     char 'N'
     skipSpace
-    decimal
+    (signed decimal)
     skipSpace
-    char '"'
-    wns <- takeTill (== '"')
-    takeTill isEndOfLine
+    s <- takeTill isEndOfLine
 
-    return wns
+    return $ trace "weightNamesParser" $
+        TS.splitOn "\" \"" s
 
 
 data UnitEnergy = MEV | GEV deriving (Eq, Ord, Read, Show)
@@ -108,17 +115,19 @@ data Units = Units {
 
 unitParser :: Parser Units
 unitParser = do
+    return $ trace "unitParser" ()
     char 'U'; skipSpace
-    ue <- manyTill isSpace
-    ul <- manyTill isSpace
+    ue <- takeTill isSpace; skipSpace
+    ul <- takeTill isSpace; skipSpace
 
-    return (Units (read ue) (read ul))
+    return (Units (read $ TS.unpack ue) (read $ TS.unpack ul))
 
 
 type CrossSection = (Double, Double)
 
 crossSectionParser :: Parser CrossSection
 crossSectionParser = do
+    return $ trace "crossSectionParser" ()
     char 'C'; skipSpace
     cs <- doub
     err <- doub
@@ -144,6 +153,7 @@ data HeavyIonInfo = HeavyIonInfo {
 
 heavyIonInfoParser :: Parser HeavyIonInfo
 heavyIonInfoParser = do
+    return $ trace "heavyIonInfoParser" ()
     char 'H'; skipSpace
     nhs <- dec
     npp <- dec
@@ -176,6 +186,7 @@ data PDFInfo = PDFInfo {
 
 pdfInfoParser :: Parser PDFInfo
 pdfInfoParser = do
+    return $ trace "pdfInfoParser" ()
     char 'F'; skipSpace
     id1 <- dec
     id2 <- dec
@@ -190,6 +201,7 @@ pdfInfoParser = do
     return (PDFInfo id1 id2 x1 x2 q xfx1 xfx2 set1 set2)
 
 data Vertex = Vertex {
+    vertexBarcode :: Int,
     vertexID :: Int,
     vertexFourVec :: XYZT,
     nOrphan :: Int,
@@ -200,7 +212,9 @@ data Vertex = Vertex {
 
 vertexParser :: Parser Vertex
 vertexParser = do
+    return $ trace "vertexParser" ()
     char 'V'; skipSpace
+    vtxbc <- dec
     vtxid <- dec
     x <- doub
     y <- doub
@@ -212,12 +226,13 @@ vertexParser = do
     norph <- dec
     nout <- dec
     nvtxwgt <- dec
-    vtxwgts <- parseList nvtxwgt double
+    vtxwgts <- parseList nvtxwgt (signed double)
 
-    return (Vertex vtxid, vec, norph, nout, nvtxwgt, vtxwgts)
+    return (Vertex vtxbc vtxid vec norph nout nvtxwgt vtxwgts)
 
     
 data Particle = Particle {
+    partBarcode :: Int,
     pdgID :: Int,
     partFourVec :: XYZT,
     partM :: Double,
@@ -231,7 +246,9 @@ data Particle = Particle {
 
 particleParser :: Parser Particle
 particleParser = do
+    return $ trace "particleParser" ()
     char 'P'; skipSpace
+    bc <- dec
     pdgid <- dec
 
     x <- doub
@@ -255,16 +272,16 @@ particleParser = do
 
     fs <- parseList nf f
 
-    return (Particle pdgid vec m stat ptheta pphi pvbc nf fs)
+    return (Particle bc pdgid vec m stat ptheta pphi pvbc nf fs)
 
 
 data Event = Event {
     eventInfo :: EventInfo,
     weightNames :: WeightNames,
     units :: Units,
-    crossSection :: CrossSection,
-    heavyIonInfo :: HeavyIonInfo,
-    pdfInfo :: PDFInfo,
+    crossSection :: Maybe CrossSection,
+    heavyIonInfo :: Maybe HeavyIonInfo,
+    pdfInfo :: Maybe PDFInfo,
     vertices :: IntMap Vertex,
     particles :: IntMap Particle
 } deriving (Eq, Ord, Read, Show)
@@ -278,11 +295,18 @@ eventParser = do
     wns <- weightNamesParser; skipSpace
     uns <- unitParser; skipSpace
     xsecs <- crossSectionParser; skipSpace
-    hii <- heavyIonInfoParser; skipSpace
-    pi <- pdfInfoParser
+    -- hii <- heavyIonInfoParser; skipSpace
+    pi <- pdfInfoParser; skipSpace
 
     -- parse vertices and particles
+    many' $ (char 'V' <|> char 'P') >> takeTill isEndOfLine
+    return $ trace "eventParser" $
+        Event ei wns uns (Just xsecs) Nothing (Just pi) IM.empty IM.empty
 
+
+-- todo
+-- Info tagged union
+-- choice
 
 
 
@@ -295,7 +319,8 @@ hepMCParser :: Parser HepMC
 hepMCParser = do
     skipSpace
     v <- versionParser
-    string "HepMC::IO_GenEvent-START_EVENT_LISTING"
-    evts <- manyTill eventParser (string "HepMC::IO_GenEvent-END_EVENT_LISTING")
 
-    return (HepMC v, evts)
+    string "HepMC::IO_GenEvent-START_EVENT_LISTING"; skipSpace
+    evts <- many' eventParser
+
+    return $ trace "hepMCParser" HepMC v evts
