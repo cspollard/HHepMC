@@ -2,10 +2,6 @@
 
 module Data.HepMC.Parser where
 
-import Data.HepMC.Parser.Utils
-
-import Data.HepMC.LorentzVector
-
 import qualified Data.IntMap as IM
 import Data.IntMap (IntMap)
 import qualified Data.Map as M
@@ -21,89 +17,12 @@ import Data.Char (isSpace)
 
 import Control.Applicative (Alternative(..))
 
--- just to make things easier...
-type Version = TL.Text
-
-data EventInfo = EventInfo {
-    eventNumber :: Int,
-    nMultPartInts :: Int,
-    eventScale :: Double,
-    alphaQCD :: Double,
-    alphaQED :: Double,
-    signalProcessID :: Int,
-    signalProcessBarcode :: Int,
-    nVertices :: Int,
-    beamParticleBarcodes :: (Int, Int),
-    nRndmStateInts :: Int,
-    rndmStateInts :: [Int],
-    nEventWeights :: Int,
-    eventWeights :: [Double]
-} deriving (Eq, Ord, Read, Show)
-
-type WeightNames = [TL.Text]
-
-data UnitEnergy = MEV | GEV deriving (Eq, Ord, Read, Show)
-data UnitLength = MM | CM deriving (Eq, Ord, Read, Show)
-
-data Units = Units {
-    unitEnergy :: UnitEnergy,
-    unitLength :: UnitLength
-} deriving (Eq, Ord, Read, Show)
-
-type CrossSection = (Double, Double)
-
-data HeavyIonInfo = HeavyIonInfo {
-    nHardScatters :: Int,
-    nProjParts :: Int,
-    nTargParts :: Int,
-    nNNInts :: Int,
-    nSpectNeuts :: Int,
-    nSpectProts :: Int,
-    nNNwoundColls :: Int,
-    nNwoundNColls :: Int,
-    nNwoundNwoundColls :: Int,
-    collImpactParam :: Double,
-    eventPlaneAzimuth :: Double,
-    nucleonEccent :: Double,
-    inelastCrossSec :: Double
-} deriving (Eq, Ord, Read, Show)
-
-data PDFInfo = PDFInfo {
-    pdfID1 :: Int,
-    pdfID2 :: Int,
-    pdfX1 :: Double,
-    pdfX2 :: Double,
-    qScale :: Double,
-    pdfXfx1 :: Double,
-    pdfXfx2 :: Double,
-    pdfSetID1 :: Int,
-    pdfSetID2 :: Int
-} deriving (Eq, Ord, Read, Show)
-
-data Vertex = Vertex {
-    vertexBarcode :: Int,
-    vertexID :: Int,
-    vertexFourVec :: XYZT,
-    nOrphan :: Int,
-    nOutgoing :: Int,
-    nVertexWeights :: Int,
-    vertexWeights :: [Double],
-    particles :: [Particle]
-} deriving (Eq, Ord, Read, Show)
-
-data Particle = Particle {
-    partBarcode :: Int,
-    pdgID :: Int,
-    partFourVec :: XYZT,
-    partM :: Double,
-    partStatus :: Int,
-    polarizationTheta :: Double,
-    polarizationPhi :: Double,
-    parentVertexBarcode :: Int,
-    nFlows :: Int,
-    flows :: [(Int, Int)]
-} deriving (Eq, Ord, Read, Show)
-
+import Data.HepMC.HepMCFile
+import Data.HepMC.Event
+import Data.HepMC.LorentzVector
+import Data.HepMC.Vertex
+import Data.HepMC.Particle
+import Data.HepMC.Parser.Utils
 
 parseVersion :: Parser Version
 parseVersion = do
@@ -149,12 +68,14 @@ parseEventInfo = do
     return $
         EventInfo en nmpi scale aqcd aqed spid spbc nvtx bpbcs nrs rs nevtwgts evtwgts
 
+
 parseWeightNames :: Parser WeightNames
 parseWeightNames = do
     n <- decimal
     s <- count n parseQuote
 
     return s
+
 
 parseUnits :: Parser Units
 parseUnits = do
@@ -263,16 +184,6 @@ parseParticle = do
         Particle bc pdgid vec m stat ptheta pphi pvbc nf fs
 
 
-data EventHeader = EventHeader {
-    eventInfo :: EventInfo,
-    weightNames :: Maybe WeightNames,
-    units :: Units,
-    crossSection :: Maybe CrossSection,
-    heavyIonInfo :: Maybe HeavyIonInfo,
-    pdfInfo :: Maybe PDFInfo
-} deriving (Eq, Ord, Read, Show)
-
-
 parseHeaderLine :: Parser (Char, TL.Text)
 parseHeaderLine = do
     k <- satisfy $ inClass "NUCHF"; skipSpace
@@ -296,12 +207,6 @@ parseEventHeader = do
     return $ EventHeader ei wn u cs hii pdfi
 
 
-data Event = Event {
-    eventHeader :: EventHeader,
-    eventVertices :: [Vertex]
-} deriving (Eq, Ord, Read, Show)
-
-
 parseEvent :: Parser Event
 parseEvent = do
     header <- parseEventHeader
@@ -310,14 +215,8 @@ parseEvent = do
     return $ Event header verts
 
 
-data HepMC = HepMC {
-    version :: Version,
-    events :: [Event]
-} deriving (Eq, Ord, Read, Show)
-
-
-hepMCParser :: Parser HepMC
-hepMCParser = do
+hepMCFileParser :: Parser HepMCFile
+hepMCFileParser = do
     skipSpace
     v <- parseVersion
     parseBeginEventsLine
@@ -326,4 +225,4 @@ hepMCParser = do
 
     parseEndEventsLine
 
-    return $ HepMC v evts
+    return $ HepMCFile v evts

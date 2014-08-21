@@ -9,4 +9,4 @@ main :: IO ()
 main = do
     text <- TIO.readFile =<< head `fmap` getArgs
 
-    APT.parseTest hepMCParser text
+    APT.parseTest hepMCFileParser text
