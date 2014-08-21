@@ -1,8 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Data.HHepMC where
+module Data.HHepMC.Parser where
 
-import Debug.Trace (traceShowId)
+import Data.HHepMC.Parser.Utils
 
 import Data.LorentzVector
 
@@ -16,50 +16,13 @@ import Data.Attoparsec.Text.Lazy
 
 import qualified Data.Text as TS
 import qualified Data.Text.Lazy as TL
-import Data.Text (Text)
 
 import Data.Char (isSpace)
 
 import Control.Applicative (Alternative(..))
 
-import Control.Monad (liftM)
-
 -- just to make things easier...
-parseWithSpace :: Parser a -> Parser a
-parseWithSpace p = do
-    x <- p; skipSpace
-
-    return x
-
-dec :: Parser Int
-dec = parseWithSpace (signed decimal)
-
-doub :: Parser Double
-doub = parseWithSpace (signed double)
-
-
-parseList :: Int -> Parser a -> Parser [a]
-parseList n p = do
-    count n (parseWithSpace p)
-
-
-parseQuote :: Parser TS.Text
-parseQuote = do
-    skipSpace
-    char '"'
-    x <- takeTill (== '"')
-    char '"'
-    return x
-
-
-toEndLine :: Parser TS.Text
-toEndLine = do
-    s <- takeTill isEndOfLine
-    endOfLine
-    return s
-
-
-type Version = Text
+type Version = TL.Text
 
 data EventInfo = EventInfo {
     eventNumber :: Int,
@@ -77,7 +40,7 @@ data EventInfo = EventInfo {
     eventWeights :: [Double]
 } deriving (Eq, Ord, Read, Show)
 
-type WeightNames = [Text]
+type WeightNames = [TL.Text]
 
 data UnitEnergy = MEV | GEV deriving (Eq, Ord, Read, Show)
 data UnitLength = MM | CM deriving (Eq, Ord, Read, Show)
@@ -142,23 +105,6 @@ data Particle = Particle {
 } deriving (Eq, Ord, Read, Show)
 
 
-data HepMCLine =
-    WeightsLine WeightNames
-    | UnitsLine Units
-    | CrossSectionLine CrossSection
-    | HeavyIonLine Text
-    | PDFLine Text
-    deriving (Ord, Read, Show)
-
-instance Eq HepMCLine where
-    WeightsLine _ == WeightsLine _ = True
-    UnitsLine _ == UnitsLine _ = True
-    CrossSectionLine _ == CrossSectionLine _ = True
-    HeavyIonLine _ == HeavyIonLine _ = True
-    PDFLine _ == PDFLine _ = True
-    _ == _ = False
-
-
 parseVersion :: Parser Version
 parseVersion = do
     string "HepMC::Version"; skipSpace
@@ -213,7 +159,6 @@ parseWeightNames = do
 parseUnits :: Parser Units
 parseUnits = do
     ue <- takeTill isSpace
-    let x = traceShowId ue
     skipSpace
     ul <- takeText
 
@@ -327,7 +272,8 @@ data EventHeader = EventHeader {
     pdfInfo :: Maybe PDFInfo
 } deriving (Eq, Ord, Read, Show)
 
-parseHeaderLine :: Parser (Char, Text)
+
+parseHeaderLine :: Parser (Char, TL.Text)
 parseHeaderLine = do
     k <- satisfy $ inClass "NUCHF"; skipSpace
     r <- toEndLine
@@ -341,12 +287,11 @@ parseEventHeader = do
     ls <- many parseHeaderLine
     let m = M.fromList ls
 
-    let wn = maybeResult . parse parseWeightNames . TL.fromStrict =<< M.lookup 'N' m
-    let u = fromJust $ maybeResult . parse parseUnits . TL.fromStrict =<< M.lookup 'U' m
-    let cs = maybeResult . parse parseCrossSection . TL.fromStrict =<< M.lookup 'C' m
-    let hii = maybeResult . parse parseHeavyIonInfo . TL.fromStrict =<< M.lookup 'H' m
-    let pdfi = maybeResult . parse parsePDFInfo . TL.fromStrict =<< M.lookup 'F' m
-
+    let wn = maybeResult . parse parseWeightNames =<< M.lookup 'N' m
+    let u = fromJust $ maybeResult . parse parseUnits =<< M.lookup 'U' m
+    let cs = maybeResult . parse parseCrossSection =<< M.lookup 'C' m
+    let hii = maybeResult . parse parseHeavyIonInfo =<< M.lookup 'H' m
+    let pdfi = maybeResult . parse parsePDFInfo =<< M.lookup 'F' m
 
     return $ EventHeader ei wn u cs hii pdfi
 
@@ -356,45 +301,20 @@ data Event = Event {
     eventVertices :: [Vertex]
 } deriving (Eq, Ord, Read, Show)
 
-{-
-eventParser :: Parser Event
-eventParser = do
-    -- parse info
-    ei <- eventInfoParser; skipSpace
 
-    -- parse units, weights, xsecs, heavy ions, pdfs
-    wns <- weightNamesParser
-    uns <- unitParser
-    xsecs <- crossSectionParser
-    -- hii <- heavyIonInfoParser
-    pi <- pdfInfoParser
-
-    next <- peakChar'
-
-    let vertices = IM.empty
-    case next of
-        'V' -> 
-
-    -- parse vertices and particles
-    many ((vertexParser >> return ()) <|> (particleParser >> return ()))
-    -- many $ (char 'V' <|> char 'P') >> toEndLine
-    return $ Event ei wns uns (Just xsecs) Nothing (Just pi) IM.empty IM.empty
--}
-
-
-parseEvent :: Parser (EventHeader, [Vertex])
+parseEvent :: Parser Event
 parseEvent = do
     header <- parseEventHeader
     verts <- many parseVertex
 
-    return (header, verts)
+    return $ Event header verts
 
 
 data HepMC = HepMC {
     version :: Version,
-    event :: [(EventHeader, [Vertex])]
-    -- events :: [Event]
+    events :: [Event]
 } deriving (Eq, Ord, Read, Show)
+
 
 hepMCParser :: Parser HepMC
 hepMCParser = do
