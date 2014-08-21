@@ -1,6 +1,6 @@
 module Main where
 
-import Data.HHepMC.Parser
+import Data.HepMC.Parser
 import qualified Data.Attoparsec.Text.Lazy as APT
 import qualified Data.Text.Lazy.IO as TIO
 import System.Environment (getArgs)
