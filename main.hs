@@ -6,8 +6,6 @@ import qualified Data.Text.Lazy.IO as TIO
 import System.Environment (getArgs)
 
 
--- parseHMC :: Text -> 
-
 main :: IO ()
 main = do
     args <- getArgs
