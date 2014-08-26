@@ -130,8 +130,8 @@ parsePDFInfo = do
         PDFInfo id1 id2 x1 x2 q xfx1 xfx2 set1 set2
 
 
-parseVertex :: Parser Vertex
-parseVertex = do
+parseVertParts :: Parser (Vertex, [Particle])
+parseVertParts = do
     char 'V'; skipSpace
     vtxbc <- dec
     vtxid <- dec
@@ -149,8 +149,10 @@ parseVertex = do
 
     parts <- many parseParticle
 
-    return $
-        Vertex vtxbc vtxid vec norph nout nvtxwgt vtxwgts parts
+    let bcs = map partBarcode parts
+    let v = Vertex vtxbc vtxid vec norph nout nvtxwgt vtxwgts bcs
+
+    return (v, parts)
 
 
 parseParticle :: Parser Particle
@@ -210,9 +212,15 @@ parseEventHeader = do
 parseEvent :: Parser Event
 parseEvent = do
     header <- parseEventHeader
-    verts <- many parseVertex
+    vertparts <- many parseVertParts
 
-    return $ Event header verts
+    let insertVert v m = IM.insert (vertexBarcode v) v m
+    let insertParts ps m = foldr (\p m' -> IM.insert (partBarcode p) p m') m ps
+    let insertVertParts (v, ps) (vmap, pmap) = (insertVert v vmap, insertParts ps pmap)
+
+    let (verts, parts) = foldr insertVertParts (IM.empty, IM.empty) vertparts
+
+    return $ Event header verts parts
 
 
 hepMCFileParser :: Parser HepMCFile

@@ -1,7 +1,7 @@
 module Data.HepMC.Vertex where
 
 import Data.HepMC.LorentzVector
-import Data.HepMC.Particle
+import qualified Data.IntMap as IM
 
 data Vertex = Vertex {
     vertexBarcode :: Int,
@@ -11,5 +11,7 @@ data Vertex = Vertex {
     nOutgoing :: Int,
     nVertexWeights :: Int,
     vertexWeights :: [Double],
-    particles :: [Particle]
+    particles :: [Int]
 } deriving (Eq, Ord, Read, Show)
+
+type Vertices = IM.IntMap Vertex

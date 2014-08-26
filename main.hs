@@ -1,12 +1,28 @@
 module Main where
 
 import Data.HepMC.Parser
+import Data.HepMC.HepMCFile
+import Data.HepMC.Event
 import qualified Data.Attoparsec.Text.Lazy as APT
+import Data.Text.Lazy (pack)
 import qualified Data.Text.Lazy.IO as TIO
 import System.Environment (getArgs)
+import System.IO (getContents)
+import Control.Monad (mapM_)
+import Data.Maybe (fromJust)
+import qualified Data.IntMap as IM
 
 main :: IO ()
 main = do
-    text <- TIO.readFile =<< head `fmap` getArgs
+    fname <- head `fmap` getArgs
+    text <- case fname of
+        "-" -> pack `fmap` getContents
+        _ -> TIO.readFile fname
 
-    APT.parseTest hepMCFileParser text
+    let f = fromJust . APT.maybeResult . APT.parse hepMCFileParser $ text
+
+    -- let fsParts = 
+
+    mapM_ (mapM_ print . IM.elems . eventParticles) $ events f
+
+
