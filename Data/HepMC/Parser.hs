@@ -19,7 +19,7 @@ import Control.Applicative (Alternative(..))
 
 import Data.HepMC.HepMCFile
 import Data.HepMC.Event
-import Data.HepMC.LorentzVector
+import Data.HepMC.FourMomentum
 import Data.HepMC.Vertex
 import Data.HepMC.Particle
 import Data.HepMC.Parser.Utils

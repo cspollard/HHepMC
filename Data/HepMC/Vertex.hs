@@ -1,6 +1,6 @@
 module Data.HepMC.Vertex where
 
-import Data.HepMC.LorentzVector
+import Data.HepMC.FourMomentum
 import qualified Data.Set as S
 
 data Vertex = Vertex {

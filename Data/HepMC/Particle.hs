@@ -1,6 +1,6 @@
 module Data.HepMC.Particle where
 
-import Data.HepMC.LorentzVector
+import Data.HepMC.FourMomentum
 import Data.HepMC.Barcode
 import qualified Data.Set as S
 
