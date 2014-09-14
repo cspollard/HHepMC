@@ -18,7 +18,7 @@ data EventInfo = EventInfo {
     rndmStateInts :: [Int],
     nEventWeights :: Int,
     eventWeights :: [Double]
-} deriving (Eq, Ord, Read, Show)
+} deriving (Read, Show)
 
 
 type WeightNames = [TL.Text]

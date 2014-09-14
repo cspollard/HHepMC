@@ -1,17 +1,31 @@
 module Data.HepMC.Vertex where
 
 import Data.HepMC.LorentzVector
-import qualified Data.IntMap as IM
+import qualified Data.Set as S
 
 data Vertex = Vertex {
-    vertexBarcode :: Int,
-    vertexID :: Int,
-    vertexFourVec :: XYZT,
+    vtxBC :: Int,
+    vtxID :: Int,
+    vtxFourVec :: XYZT,
     nOrphan :: Int,
     nOutgoing :: Int,
-    nVertexWeights :: Int,
-    vertexWeights :: [Double],
+    nVtxWeights :: Int,
+    vtxWeights :: [Double],
     particles :: [Int]
-} deriving (Eq, Ord, Read, Show)
+} deriving (Read, Show)
 
-type Vertices = IM.IntMap Vertex
+instance Barcode Vertex where
+    bc p = vtxBC p
+
+instance Eq Vertex where
+    (==) = liftBC2 (==)
+
+instance Ord Vertex where
+    compare = liftBC2 compare
+
+
+type Vertices = S.Set Vertex
+
+
+class HasVertices hp where
+    vertices :: hp -> Vertices
