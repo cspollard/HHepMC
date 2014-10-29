@@ -1,6 +1,8 @@
 module Data.HepMC.Vertex where
 
 import Data.HepMC.FourMomentum
+import Data.HepMC.Barcode
+import Data.HepMC.Particle
 import qualified Data.Set as S
 
 data Vertex = Vertex {
@@ -11,11 +13,11 @@ data Vertex = Vertex {
     nOutgoing :: Int,
     nVtxWeights :: Int,
     vtxWeights :: [Double],
-    particles :: [Int]
+    vtxParts :: Particles
 } deriving (Read, Show)
 
 instance Barcode Vertex where
-    bc p = vtxBC p
+    bc = vtxBC
 
 instance Eq Vertex where
     (==) = liftBC2 (==)
@@ -23,9 +25,10 @@ instance Eq Vertex where
 instance Ord Vertex where
     compare = liftBC2 compare
 
+instance HasParticles Vertex where
+    particles = vtxParts
 
 type Vertices = S.Set Vertex
-
 
 class HasVertices hp where
     vertices :: hp -> Vertices

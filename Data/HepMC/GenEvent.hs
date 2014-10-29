@@ -3,26 +3,28 @@ module Data.HepMC.GenEvent where
 import Data.HepMC.Units
 import Data.HepMC.Particle
 import Data.HepMC.Vertex
-import qualified Data.IntMap as IM
+import qualified Data.Set as S
 
 data GenEvent = GenEvent {
     momentumUnit :: UnitMomentum,
     lengthUnit :: UnitLength,
-    eventVertices :: Vertices,
-    eventParticles :: Particles
+    eventVertices :: Vertices
 } deriving (Read, Show)
 
-instance HasParticles GenEvet where
-    particles = eventParticles
-
-instance HasVertices GenEvet where
+instance HasVertices GenEvent where
     vertices = eventVertices
 
+instance HasParticles GenEvent where
+    -- TODO
+    -- slow?
+    -- union of sets of particles from each vertex in event
+    particles = S.unions . map particles . S.toAscList . vertices
+
 genEvent :: UnitMomentum -> UnitLength -> GenEvent
-genEvent m l = GenEvent m l IM.empty IM.empty
+genEvent m l = GenEvent m l S.empty
 
-addVertex :: GenEvent -> Vertex -> GenEvent
-addVertex g v = g {eventVertices = IM.insert (bc v) v (vertices g)}
+addVertex :: Vertex -> GenEvent -> GenEvent
+addVertex v g = g {eventVertices = S.insert v (vertices g)}
 
-removeVertex :: GenEvent -> Vertex -> GenEvent
-removeVertex g v = g {eventVertices = IM.delete (bc v) vertices g) v}
+removeVertex :: Vertex -> GenEvent -> GenEvent
+removeVertex v g = g {eventVertices = S.delete v (vertices g)}
