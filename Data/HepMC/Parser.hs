@@ -29,32 +29,6 @@ parseEndEventsLine = do
     skipSpace
 
 
-parseEventInfo :: Parser EventInfo
-parseEventInfo = do
-    char 'E'; skipSpace
-    en <- dec
-    nmpi <- dec
-    scale <- doub
-    aqcd <- doub
-    aqed <- doub
-    spid <- dec
-    spbc <- dec
-    nvtx <- dec
-    bc1 <- dec
-    bc2 <- dec
-    let bpbcs = (bc1, bc2)
-
-    nrs <- dec
-    rs <- parseList nrs (signed decimal)
-
-    nevtwgts <- dec
-    evtwgts <- parseList nevtwgts $ (signed double)
-
-    skipSpace
-
-    return $
-        EventInfo en nmpi scale aqcd aqed spid spbc nvtx bpbcs nrs rs nevtwgts evtwgts
-
 
 parseWeightNames :: Parser WeightNames
 parseWeightNames = do
@@ -117,22 +91,19 @@ parsePDFInfo = do
         PDFInfo id1 id2 x1 x2 q xfx1 xfx2 set1 set2
 
 
+parseXYZT :: Parser XYZT
+parseXYZT = XYZT <$> doub <*> doub <*> doub <*> doub
+
 parseVertParts :: Parser (Vertex, [Particle])
 parseVertParts = do
     char 'V'; skipSpace
     vtxbc <- dec
     vtxid <- dec
-    x <- doub
-    y <- doub
-    z <- doub
-    t <- doub
-
-    let vec = XYZT x y z t
 
     norph <- dec
     nout <- dec
     nvtxwgt <- dec
-    vtxwgts <- parseList nvtxwgt (signed double)
+    vtxwgts <- parseList nvtxwgt <*> (signed double)
 
     parts <- many parseParticle
 
@@ -184,8 +155,7 @@ parseHeaderLine = do
 parseEventHeader :: Parser EventHeader
 parseEventHeader = do
     ei <- parseEventInfo
-    ls <- many parseHeaderLine
-    let m = M.fromList ls
+    m <- M.fromList `fmap` many parseHeaderLine
 
     let wn = maybeResult . parse parseWeightNames =<< M.lookup 'N' m
     let u = fromJust $ maybeResult . parse parseUnits =<< M.lookup 'U' m
