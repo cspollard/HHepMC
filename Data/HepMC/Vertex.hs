@@ -35,6 +35,13 @@ instance HasParticles Vertex where
     particles = vtxParts
 
 
+instance FourMomentum Vertex where
+    xV = xV . vtxFourVec
+    yV = yV . vtxFourVec
+    zV = zV . vtxFourVec
+    tV = tV . vtxFourVec
+
+
 type Vertices = S.Set Vertex
 
 
@@ -42,8 +49,8 @@ class HasVertices hp where
     vertices :: hp -> Vertices
 
 
-hepmcVertex :: Parser Vertex
-hepmcVertex = do
+parserVertex :: Parser Vertex
+parserVertex = do
     _ <- char 'V' <* skipSpace
     vtxbc <- decSpace
     vtxid <- decSpace
@@ -55,6 +62,6 @@ hepmcVertex = do
     nvtxwgt <- decSpace
     vtxwgts <- count nvtxwgt doubSpace
 
-    parts <- S.fromList <$> many particle
+    parts <- S.fromList <$> many parserParticle
 
     return $ Vertex vtxbc vtxid mom norph nout nvtxwgt vtxwgts parts

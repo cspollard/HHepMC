@@ -1,12 +1,13 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Data.HepMC.HepMCFile where
 
-import qualified Data.Text.Lazy as TL
+import Data.Text.Lazy (Text, fromStrict)
+import Data.HepMC.Parser.Common
 import Data.HepMC.Event
-import Data.Attoparsec.Text.Lazy
-import Control.Applicative
 
 
-type Version = TL.Text
+type Version = Text
 
 data HepMCFile = HepMCFile {
     version :: Version,
@@ -14,29 +15,16 @@ data HepMCFile = HepMCFile {
 } deriving (Eq, Ord, Read, Show)
 
 
-parseHepMCHeader :: Parser Version
-parseHepMCHeader = do
+parserVersion :: Parser Version
+parserVersion = do
     skipSpace
-    string "HepMC::Version"
+    _ <- string "HepMC::Version"
     skipSpace
-    v <- manyTill endOfLine
+    v <- takeTill isEndOfLine <* endOfLine
+    _ <- string "HepMC::IO_GenEvent-START_EVENT_LISTING"
     skipSpace
-    string "HepMC::IO_GenEvent-START_EVENT_LISTING"
-    skipSpace
-    return v
+    return $ fromStrict v
 
 
-parseEvents :: TL.Text -> [Event]
-parseEvents "" = []
-parseEvents t = case r of
-                    Done t' e -> e
-    where
-        r = 
-
-
-hepMCFile :: TL.Text -> Maybe HepMCFile
-hepMCFile t = HepMCFile <$> v' <*> es
-    where
-        v = parse parseHepMCHeader
-
-    HepMCFile  many parseEvent
+parserHepMC :: Parser HepMCFile
+parserHepMC = HepMCFile <$> parserVersion <*> many parserEvent

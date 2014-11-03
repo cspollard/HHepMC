@@ -45,8 +45,8 @@ instance FourMomentum Particle where
     tV = tV . partFourMom
 
 
-particle :: Parser Particle
-particle = do
+parserParticle :: Parser Particle
+parserParticle = do
     _ <- char 'P' <* skipSpace
     bcode <- decSpace
     pdgid <- decSpace
@@ -61,7 +61,7 @@ particle = do
     pvbc <- decSpace
     nf <- decSpace
 
-    fs <- count nf $ tuple decSpace decimal
+    fs <- count nf $ tuple decSpace decSpace
 
     return $
         Particle bcode pdgid mom m stat ptheta pphi pvbc nf fs

@@ -15,7 +15,7 @@ type WeightNames = [Text]
 parserWeightNames :: Parser WeightNames
 parserWeightNames = do
     n <- decSpace
-    count n quote
+    count n $ quote <* skipSpace
 
 
 type CrossSection = (Double, Double)
@@ -54,4 +54,3 @@ parserEventHeader = do
     let pdfi = maybeResult . parse parserPDFInfo =<< M.lookup 'F' m
 
     return $ EventHeader ei wn u cs hii pdfi
-
