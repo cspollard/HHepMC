@@ -2,6 +2,7 @@ module Main where
 
 import Data.HepMC.Parser.Common
 import Data.HepMC.HepMCFile
+import Data.Queue
 import qualified Data.Text.Lazy.IO as TIO
 import System.Environment (getArgs)
 
@@ -19,6 +20,6 @@ main = do
     -- let o = fmap (take 0 . events) $ maybeResult (parse parserHepMC text)
 
     let line = takeTill isEndOfLine <* endOfLine
-    let r = maybeResult $ parse (many line) text
+    let r = maybeResult $ parse (manyQ line) text
 
-    print $ fmap (const 0) r
+    print $ takeQ 5 <$> r

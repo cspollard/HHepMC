@@ -5,13 +5,14 @@ module Data.HepMC.HepMCFile where
 import Data.Text.Lazy (Text, fromStrict)
 import Data.HepMC.Parser.Common
 import Data.HepMC.Event
+import Data.Queue
 
 type Version = Text
 
 data HepMCFile = HepMCFile {
     version :: Version,
-    events :: [Event]
-} deriving (Eq, Ord, Read, Show)
+    events :: Queue Event
+} deriving Show
 
 
 parserVersion :: Parser Version
@@ -26,4 +27,4 @@ parserVersion = do
 
 
 parserHepMC :: Parser HepMCFile
-parserHepMC = HepMCFile <$> parserVersion <*> many parserEvent
+parserHepMC = HepMCFile <$> parserVersion <*> manyQ parserEvent
