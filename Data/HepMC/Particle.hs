@@ -1,5 +1,6 @@
 module Data.HepMC.Particle where
 
+import Data.HepMC.Parser.Common
 import Data.HepMC.FourMomentum
 import Data.HepMC.Barcoded
 import qualified Data.Set as S
@@ -35,16 +36,12 @@ class HasParticles hp where
 
 parseParticle :: Parser Particle
 parseParticle = do
-    char 'P'; skipSpace
-    bc <- dec
-    pdgid <- dec
+    _ <- char 'P' <* skipSpace
+    bc <- decSpace
+    pdgid <- decSpace
 
-    x <- doub
-    y <- doub
-    z <- doub
-    t <- doub
 
-    let vec = XYZT x y z t
+    vec <- parseXYZT <* skipSpace
 
     m <- doub
     stat <- dec

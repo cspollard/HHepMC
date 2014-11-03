@@ -1,6 +1,5 @@
 module Main where
 
-import Data.HepMC.Parser
 import Data.HepMC.HepMCFile
 import qualified Data.Attoparsec.Text.Lazy as APT
 import Data.Text.Lazy (pack)

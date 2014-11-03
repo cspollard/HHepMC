@@ -67,22 +67,3 @@ class Eq v => FourMomentum v where
         where
             deta = etaV x - etaV w
             dphi = phiV x - phiV w
-
-
-data XYZT = XYZT Double Double Double Double
-    deriving (Eq, Ord, Read, Show)
-
-data PtEtaPhiE = PtEtaPhiE Double Double Double Double
-    deriving (Eq, Ord, Read, Show)
-
-instance FourMomentum XYZT where
-    xV (XYZT x _ _ _) = x
-    yV (XYZT _ y _ _) = y
-    zV (XYZT _ _ z _) = z
-    tV (XYZT _ _ _ t) = t
-
-instance FourMomentum PtEtaPhiE where
-    ptV (PtEtaPhiE pt _ _ _) = pt
-    etaV (PtEtaPhiE _ eta _ _) = eta
-    phiV (PtEtaPhiE _ _ phi _) = phi
-    eV (PtEtaPhiE _ _ _ e) = e

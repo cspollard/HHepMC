@@ -1,7 +1,7 @@
 module Data.HepMC.Vertex where
 
 import Data.HepMC.FourMomentum
-import Data.HepMC.Barcode
+import Data.HepMC.Barcoded
 import Data.HepMC.Particle
 import qualified Data.Set as S
 

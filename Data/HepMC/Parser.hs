@@ -5,6 +5,3 @@ parseEndEventsLine = do
 
 
 
-parseXYZT :: Parser XYZT
-parseXYZT = XYZT <$> doub <*> doub <*> doub <*> doub
-
