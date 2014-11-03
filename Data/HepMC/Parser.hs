@@ -20,7 +20,7 @@ import Data.HepMC.Event
 import Data.HepMC.FourMomentum
 import Data.HepMC.Vertex
 import Data.HepMC.Particle
-import Data.HepMC.Parser.Utils
+import Data.HepMC.Parser.Common
 
 
 parseEndEventsLine :: Parser ()
