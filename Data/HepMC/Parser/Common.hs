@@ -8,7 +8,7 @@ module Data.HepMC.Parser.Common (
     quote
 ) where
 
-import Data.Attoparsec.Text.Lazy
+import Data.Attoparsec.Text.Lazy hiding (take)
 import Data.Text.Lazy (Text, pack)
 import Control.Applicative (Applicative(..), Alternative(..))
 import Data.Functor (Functor(..), (<$>))

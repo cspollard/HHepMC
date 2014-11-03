@@ -5,7 +5,8 @@ import Data.HepMC.XYZT
 import Data.HepMC.FourMomentum
 import Data.HepMC.Barcoded
 import Data.HepMC.Particle
-import qualified Data.Set as S
+import Data.Set (Set, fromList)
+
 
 data Vertex = Vertex {
     vtxBC :: Int,
@@ -42,7 +43,7 @@ instance FourMomentum Vertex where
     tV = tV . vtxFourVec
 
 
-type Vertices = S.Set Vertex
+type Vertices = Set Vertex
 
 
 class HasVertices hp where
@@ -55,13 +56,13 @@ parserVertex = do
     vtxbc <- decSpace
     vtxid <- decSpace
 
-    mom <- parseXYZT
+    mom <- parseXYZT <* skipSpace
 
     norph <- decSpace
     nout <- decSpace
     nvtxwgt <- decSpace
     vtxwgts <- count nvtxwgt doubSpace
 
-    parts <- S.fromList <$> many parserParticle
+    parts <- fromList <$> many parserParticle
 
     return $ Vertex vtxbc vtxid mom norph nout nvtxwgt vtxwgts parts
