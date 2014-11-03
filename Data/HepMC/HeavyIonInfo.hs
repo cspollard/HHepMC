@@ -1,5 +1,7 @@
 module Data.HepMC.HeavyIonInfo where
 
+import Data.HepMC.Parser.Common
+
 data HeavyIonInfo = HeavyIonInfo {
     nHardScatters :: Int,
     nProjParts :: Int,
@@ -18,20 +20,17 @@ data HeavyIonInfo = HeavyIonInfo {
 
 
 heavyIonInfo :: Parser HeavyIonInfo
-heavyIonInfo = do
-    nhs <- dec
-    npp <- dec
-    ntp <- dec
-    nnn <- dec
-    nsn <- dec
-    nsp <- dec
-    nnnwc <- dec
-    nnwnc <- dec
-    nnwnwc <- dec
-    cip <- doub
-    epa <- doub
-    necc <- doub
-    ics <- doub
-
-    return $
-        HeavyIonInfo nhs npp ntp nnn nsn nsp nnnwc nnwnc nnwnwc cip epa necc ics
+heavyIonInfo = HeavyIonInfo <$>
+                    decSpace <*>
+                    decSpace <*>
+                    decSpace <*>
+                    decSpace <*>
+                    decSpace <*>
+                    decSpace <*>
+                    decSpace <*>
+                    decSpace <*>
+                    decSpace <*>
+                    doubSpace <*>
+                    doubSpace <*>
+                    doubSpace <*>
+                    doubSpace
