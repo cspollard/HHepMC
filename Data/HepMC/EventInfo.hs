@@ -1,6 +1,5 @@
 module Data.HepMC.EventInfo where
 
-import Data.Attoparsec.Text.Lazy
 import Data.HepMC.Parser.Common
 
 data EventInfo = EventInfo {
