@@ -1,19 +1,25 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Data.HepMC.Units where
+
+import Data.HepMC.Parser.Common
 
 data UnitMomentum = MEV | GEV deriving (Eq, Ord, Read, Show)
 data UnitLength = MM | CM deriving (Eq, Ord, Read, Show)
 
 data Units = Units {
-    unitEnergy :: UnitMomentum,
+    unitMomentum :: UnitMomentum,
     unitLength :: UnitLength
 } deriving (Eq, Ord, Read, Show)
 
 
-parseUnits :: Parser Units
-parseUnits = do
-    ue <- takeTill isSpace
-    skipSpace
-    ul <- takeText
+unitP :: Parser UnitMomentum
+unitP = string "MEV" *> return MEV <|>
+            string "GEV" *> return GEV
 
-    return $
-        Units (read $ TS.unpack ue) (read $ TS.unpack ul)
+unitL :: Parser UnitLength
+unitL = string "MM" *> return MM <|>
+            string "CM" *> return CM
+
+parseUnits :: Parser Units
+parseUnits = Units <$> unitP <*> unitL

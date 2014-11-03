@@ -1,5 +1,7 @@
 module Data.HepMC.PDFInfo where
 
+import Data.HepMC.Parser.Common
+
 data PDFInfo = PDFInfo {
     pdfID1 :: Int,
     pdfID2 :: Int,
@@ -14,16 +16,13 @@ data PDFInfo = PDFInfo {
 
 
 parsePDFInfo :: Parser PDFInfo
-parsePDFInfo = do
-    id1 <- dec
-    id2 <- dec
-    x1 <- doub
-    x2 <- doub
-    q <- doub
-    xfx1 <- doub
-    xfx2 <- doub
-    set1 <- dec
-    set2 <- dec
-
-    return $
-        PDFInfo id1 id2 x1 x2 q xfx1 xfx2 set1 set2
+parsePDFInfo = PDFInfo <$>
+                decSpace <*>
+                decSpace <*>
+                doubSpace <*>
+                doubSpace <*>
+                doubSpace <*>
+                doubSpace <*>
+                doubSpace <*>
+                decSpace <*>
+                decSpace
