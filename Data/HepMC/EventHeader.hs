@@ -1,25 +1,27 @@
 module Data.HepMC.EventHeader where
 
+import Data.Text.Lazy (Text, fromStrict)
+import qualified Data.Map as M
+import Data.Maybe (fromJust)
+
 import Data.HepMC.Parser.Common
 import Data.HepMC.EventInfo
 import Data.HepMC.PDFInfo
 import Data.HepMC.Units
 import Data.HepMC.HeavyIonInfo
 
-type WeightNames = [TL.Text]
+type WeightNames = [Text]
 
-parseWeightNames :: Parser WeightNames
-parseWeightNames = do
-    n <- decimal
-    s <- count n quote
-
-    return s
+parserWeightNames :: Parser WeightNames
+parserWeightNames = do
+    n <- decSpace
+    count n quote
 
 
 type CrossSection = (Double, Double)
 
-parseCrossSection :: Parser CrossSection
-parseCrossSection = tuple doubSpace doubSpace
+parserCrossSection :: Parser CrossSection
+parserCrossSection = tuple doubSpace doubSpace
 
 
 data EventHeader = EventHeader {
@@ -32,24 +34,24 @@ data EventHeader = EventHeader {
 } deriving (Eq, Ord, Read, Show)
 
 
-parseHeaderLine :: Parser (Char, TL.Text)
-parseHeaderLine = do
+parserHeaderLine :: Parser (Char, Text)
+parserHeaderLine = do
     k <- satisfy $ inClass "NUCHF"; skipSpace
-    r <- toEndLine
+    r <- takeTill isEndOfLine <* endOfLine
 
-    return (k, r)
+    return (k, fromStrict r)
 
 
-parseEventHeader :: Parser EventHeader
-parseEventHeader = do
+parserEventHeader :: Parser EventHeader
+parserEventHeader = do
     ei <- parseEventInfo
-    m <- M.fromList `fmap` many parseHeaderLine
+    m <- M.fromList `fmap` many parserHeaderLine
 
-    let wn = maybeResult . parse parseWeightNames =<< M.lookup 'N' m
-    let u = fromJust $ maybeResult . parse parseUnits =<< M.lookup 'U' m
-    let cs = maybeResult . parse parseCrossSection =<< M.lookup 'C' m
-    let hii = maybeResult . parse parseHeavyIonInfo =<< M.lookup 'H' m
-    let pdfi = maybeResult . parse parsePDFInfo =<< M.lookup 'F' m
+    let wn = maybeResult . parse parserWeightNames =<< M.lookup 'N' m
+    let u = fromJust $ maybeResult . parse parserUnits =<< M.lookup 'U' m
+    let cs = maybeResult . parse parserCrossSection =<< M.lookup 'C' m
+    let hii = maybeResult . parse parserHeavyIonInfo =<< M.lookup 'H' m
+    let pdfi = maybeResult . parse parserPDFInfo =<< M.lookup 'F' m
 
     return $ EventHeader ei wn u cs hii pdfi
 

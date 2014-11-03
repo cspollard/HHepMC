@@ -21,5 +21,5 @@ unitL :: Parser UnitLength
 unitL = string "MM" *> return MM <|>
             string "CM" *> return CM
 
-parseUnits :: Parser Units
-parseUnits = Units <$> unitP <*> unitL
+parserUnits :: Parser Units
+parserUnits = Units <$> unitP <*> unitL

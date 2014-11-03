@@ -19,8 +19,8 @@ data HeavyIonInfo = HeavyIonInfo {
 } deriving (Eq, Ord, Read, Show)
 
 
-heavyIonInfo :: Parser HeavyIonInfo
-heavyIonInfo = HeavyIonInfo <$>
+parserHeavyIonInfo :: Parser HeavyIonInfo
+parserHeavyIonInfo = HeavyIonInfo <$>
                     decSpace <*>
                     decSpace <*>
                     decSpace <*>

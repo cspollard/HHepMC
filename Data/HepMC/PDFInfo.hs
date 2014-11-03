@@ -15,8 +15,8 @@ data PDFInfo = PDFInfo {
 } deriving (Eq, Ord, Read, Show)
 
 
-parsePDFInfo :: Parser PDFInfo
-parsePDFInfo = PDFInfo <$>
+parserPDFInfo :: Parser PDFInfo
+parserPDFInfo = PDFInfo <$>
                 decSpace <*>
                 decSpace <*>
                 doubSpace <*>
