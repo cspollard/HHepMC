@@ -1,5 +1,7 @@
 module Data.HepMC.Vertex where
 
+import Data.HepMC.Parser.Common
+import Data.HepMC.XYZT
 import Data.HepMC.FourMomentum
 import Data.HepMC.Barcoded
 import Data.HepMC.Particle
@@ -16,38 +18,43 @@ data Vertex = Vertex {
     vtxParts :: Particles
 } deriving (Read, Show)
 
-instance Barcode Vertex where
+
+instance Barcoded Vertex where
     bc = vtxBC
+
 
 instance Eq Vertex where
     (==) = liftBC2 (==)
 
+
 instance Ord Vertex where
     compare = liftBC2 compare
+
 
 instance HasParticles Vertex where
     particles = vtxParts
 
+
 type Vertices = S.Set Vertex
+
 
 class HasVertices hp where
     vertices :: hp -> Vertices
 
 
-parseVertParts :: Parser (Vertex, [Particle])
-parseVertParts = do
-    char 'V'; skipSpace
-    vtxbc <- dec
-    vtxid <- dec
+hepmcVertex :: Parser Vertex
+hepmcVertex = do
+    _ <- char 'V' <* skipSpace
+    vtxbc <- decSpace
+    vtxid <- decSpace
 
-    norph <- dec
-    nout <- dec
-    nvtxwgt <- dec
-    vtxwgts <- parseList nvtxwgt <*> (signed double)
+    mom <- parseXYZT
 
-    parts <- many parseParticle
+    norph <- decSpace
+    nout <- decSpace
+    nvtxwgt <- decSpace
+    vtxwgts <- count nvtxwgt doubSpace
 
-    let bcs = map partBarcode parts
-    let v = Vertex vtxbc vtxid vec norph nout nvtxwgt vtxwgts bcs
+    parts <- S.fromList <$> many particle
 
-    return (v, parts)
+    return $ Vertex vtxbc vtxid mom norph nout nvtxwgt vtxwgts parts

@@ -2,13 +2,14 @@ module Data.HepMC.Particle where
 
 import Data.HepMC.Parser.Common
 import Data.HepMC.FourMomentum
+import Data.HepMC.XYZT
 import Data.HepMC.Barcoded
 import qualified Data.Set as S
 
 data Particle = Particle {
     partBC :: BC,
     pdgID :: Int,
-    partFourVec :: XYZT,
+    partFourMom :: XYZT,
     partM :: Double,
     partStatus :: Int,
     polarizationTheta :: Double,
@@ -18,11 +19,14 @@ data Particle = Particle {
     flows :: [(Int, Int)]
 } deriving (Read, Show)
 
+
 instance Barcoded Particle where
-    bc p = partBC p
+    bc = partBC
+
 
 instance Eq Particle where
     (==) = liftBC2 (==)
+
 
 instance Ord Particle where
     compare = liftBC2 compare
@@ -34,28 +38,30 @@ class HasParticles hp where
     particles :: hp -> Particles
 
 
-parseParticle :: Parser Particle
-parseParticle = do
+instance FourMomentum Particle where
+    xV = xV . partFourMom
+    yV = yV . partFourMom
+    zV = zV . partFourMom
+    tV = tV . partFourMom
+
+
+particle :: Parser Particle
+particle = do
     _ <- char 'P' <* skipSpace
-    bc <- decSpace
+    bcode <- decSpace
     pdgid <- decSpace
 
 
-    vec <- parseXYZT <* skipSpace
+    mom <- parseXYZT <* skipSpace
 
-    m <- doub
-    stat <- dec
-    ptheta <- doub
-    pphi <- doub
-    pvbc <- dec
-    nf <- dec
-    
-    let f = do
-        s <- dec
-        t <- dec
-        return (s, t)
+    m <- doubSpace
+    stat <- decSpace
+    ptheta <- doubSpace
+    pphi <- doubSpace
+    pvbc <- decSpace
+    nf <- decSpace
 
-    fs <- parseList nf f
+    fs <- count nf $ tuple decSpace decimal
 
     return $
-        Particle bc pdgid vec m stat ptheta pphi pvbc nf fs
+        Particle bcode pdgid mom m stat ptheta pphi pvbc nf fs
