@@ -22,4 +22,4 @@ unitL = string "MM" *> return MM <|>
             string "CM" *> return CM
 
 parserUnits :: Parser Units
-parserUnits = Units <$> unitP <*> unitL
+parserUnits = Units <$> (unitP <* skipSpace) <*> (unitL <* skipSpace)

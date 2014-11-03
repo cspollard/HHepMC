@@ -10,6 +10,7 @@ import Data.HepMC.PDFInfo
 import Data.HepMC.Units
 import Data.HepMC.HeavyIonInfo
 
+
 type WeightNames = [Text]
 
 parserWeightNames :: Parser WeightNames

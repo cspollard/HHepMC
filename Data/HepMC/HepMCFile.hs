@@ -6,7 +6,6 @@ import Data.Text.Lazy (Text, fromStrict)
 import Data.HepMC.Parser.Common
 import Data.HepMC.Event
 
-
 type Version = Text
 
 data HepMCFile = HepMCFile {
