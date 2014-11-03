@@ -2,6 +2,7 @@ module Data.HepMC.Event where
 
 import qualified Data.Text.Lazy as TL
 import Data.HepMC.Vertex
+import Data.HepMC.Particle
 
 data EventInfo = EventInfo {
     eventNumber :: Int,
@@ -17,7 +18,7 @@ data EventInfo = EventInfo {
     rndmStateInts :: [Int],
     nEventWeights :: Int,
     eventWeights :: [Double]
-} deriving (Eq, Ord, Read, Show)
+} deriving (Read, Show)
 
 
 type WeightNames = [TL.Text]
@@ -78,5 +79,6 @@ data EventHeader = EventHeader {
 
 data Event = Event {
     eventHeader :: EventHeader,
-    eventVertices :: [Vertex]
+    eventVertices :: Vertices,
+    eventParticles :: Particles
 } deriving (Eq, Ord, Read, Show)

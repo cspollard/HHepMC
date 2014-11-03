@@ -1,4 +1,4 @@
-module Data.HepMC.LorentzVector where
+module Data.HepMC.FourMomentum where
 
 sq :: Num a => a -> a
 sq x = x*x
@@ -7,7 +7,7 @@ sqrt' :: (Ord a, Floating a) => a -> a
 sqrt' x = if x < 0 then (- sqrt x) else sqrt x
 
 -- minimum definition: xV, yV, zV, tV
-class Eq v => LorentzVector v where
+class Eq v => FourMomentum v where
     xV :: v -> Double
     xV = pxV
 
@@ -75,13 +75,13 @@ data XYZT = XYZT Double Double Double Double
 data PtEtaPhiE = PtEtaPhiE Double Double Double Double
     deriving (Eq, Ord, Read, Show)
 
-instance LorentzVector XYZT where
+instance FourMomentum XYZT where
     xV (XYZT x _ _ _) = x
     yV (XYZT _ y _ _) = y
     zV (XYZT _ _ z _) = z
     tV (XYZT _ _ _ t) = t
 
-instance LorentzVector PtEtaPhiE where
+instance FourMomentum PtEtaPhiE where
     ptV (PtEtaPhiE pt _ _ _) = pt
     etaV (PtEtaPhiE _ eta _ _) = eta
     phiV (PtEtaPhiE _ _ phi _) = phi
