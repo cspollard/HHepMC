@@ -32,3 +32,22 @@ type Vertices = S.Set Vertex
 
 class HasVertices hp where
     vertices :: hp -> Vertices
+
+
+parseVertParts :: Parser (Vertex, [Particle])
+parseVertParts = do
+    char 'V'; skipSpace
+    vtxbc <- dec
+    vtxid <- dec
+
+    norph <- dec
+    nout <- dec
+    nvtxwgt <- dec
+    vtxwgts <- parseList nvtxwgt <*> (signed double)
+
+    parts <- many parseParticle
+
+    let bcs = map partBarcode parts
+    let v = Vertex vtxbc vtxid vec norph nout nvtxwgt vtxwgts bcs
+
+    return (v, parts)
