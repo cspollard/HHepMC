@@ -1,5 +1,6 @@
 module Data.HepMC.EventInfo where
 
+import Data.Attoparsec.Text.Lazy
 import Data.HepMC.Parser.Common
 
 data EventInfo = EventInfo {
@@ -21,26 +22,22 @@ data EventInfo = EventInfo {
 
 parseEventInfo :: Parser EventInfo
 parseEventInfo = do
-    char 'E'; skipSpace
-    en <- dec
-    nmpi <- dec
-    scale <- doub
-    aqcd <- doub
-    aqed <- doub
-    spid <- dec
-    spbc <- dec
-    nvtx <- dec
-    bc1 <- dec
-    bc2 <- dec
-    let bpbcs = (bc1, bc2)
+    _ <- char 'E'<* skipSpace
+    en <- decSpace
+    nmpi <- decSpace
+    scale <- doubSpace
+    aqcd <- doubSpace
+    aqed <- doubSpace
+    spid <- decSpace
+    spbc <- decSpace
+    nvtx <- decSpace
+    bpbcs <- tuple decSpace decSpace
 
-    nrs <- dec
-    rs <- parseList nrs (signed decimal)
+    nrs <- decSpace
+    rs <- count nrs decSpace
 
-    nevtwgts <- dec
-    evtwgts <- parseList nevtwgts $ (signed double)
-
-    skipSpace
+    nevtwgts <- decSpace
+    evtwgts <- count nevtwgts doubSpace
 
     return $
         EventInfo en nmpi scale aqcd aqed spid spbc nvtx bpbcs nrs rs nevtwgts evtwgts
