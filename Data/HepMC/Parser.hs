@@ -8,32 +8,19 @@ import qualified Data.Map as M
 
 import Data.Maybe (fromJust)
 
-import Data.Attoparsec.Text.Lazy
-
 import qualified Data.Text as TS
 import qualified Data.Text.Lazy as TL
 
 import Data.Char (isSpace)
 
-import Control.Applicative (Alternative(..))
+import Control.Applicative (Alternative(..), Applicative(..))
+import Data.Functor
 
-import Data.HepMC.HepMCFile
 import Data.HepMC.Event
 import Data.HepMC.LorentzVector
 import Data.HepMC.Vertex
 import Data.HepMC.Particle
 import Data.HepMC.Parser.Utils
-
-parseVersion :: Parser Version
-parseVersion = do
-    string "HepMC::Version"; skipSpace
-    toEndLine
-
-
-parseBeginEventsLine :: Parser ()
-parseBeginEventsLine = do
-    string "HepMC::IO_GenEvent-START_EVENT_LISTING"
-    skipSpace
 
 
 parseEndEventsLine :: Parser ()
@@ -215,14 +202,3 @@ parseEvent = do
     return $ Event header verts
 
 
-hepMCFileParser :: Parser HepMCFile
-hepMCFileParser = do
-    skipSpace
-    v <- parseVersion
-    parseBeginEventsLine
-
-    evts <- many parseEvent
-
-    parseEndEventsLine
-
-    return $ HepMCFile v evts
