@@ -4,7 +4,7 @@ import Data.HepMC.Parser.Common
 import Data.HepMC.FourMomentum
 import Data.HepMC.XYZT
 import Data.HepMC.Barcoded
-import qualified Data.Set as S
+import Data.IntMap (IntMap)
 
 data Particle = Particle {
     partBC :: BC,
@@ -32,7 +32,7 @@ instance Ord Particle where
     compare = liftBC2 compare
 
 
-type Particles = S.Set Particle
+type Particles = IntMap Particle
 
 class HasParticles hp where
     particles :: hp -> Particles

@@ -5,7 +5,7 @@ import Data.HepMC.XYZT
 import Data.HepMC.FourMomentum
 import Data.HepMC.Barcoded
 import Data.HepMC.Particle
-import Data.Set (Set, fromList)
+import Data.IntMap (IntMap, fromList, keys)
 
 
 data Vertex = Vertex {
@@ -16,7 +16,7 @@ data Vertex = Vertex {
     nOutgoing :: Int,
     nVtxWeights :: Int,
     vtxWeights :: [Double],
-    vtxParts :: Particles
+    vtxPartBCs :: [Int]
 } deriving (Read, Show)
 
 
@@ -32,10 +32,6 @@ instance Ord Vertex where
     compare = liftBC2 compare
 
 
-instance HasParticles Vertex where
-    particles = vtxParts
-
-
 instance FourMomentum Vertex where
     xV = xV . vtxFourVec
     yV = yV . vtxFourVec
@@ -43,15 +39,15 @@ instance FourMomentum Vertex where
     tV = tV . vtxFourVec
 
 
-type Vertices = Set Vertex
+type Vertices = IntMap Vertex
 
 
 class HasVertices hp where
     vertices :: hp -> Vertices
 
 
-parserVertex :: Parser Vertex
-parserVertex = do
+parserVertParts :: Parser (Vertex, Particles)
+parserVertParts = do
     _ <- char 'V' <* skipSpace
     vtxbc <- decSpace
     vtxid <- decSpace
@@ -63,6 +59,10 @@ parserVertex = do
     nvtxwgt <- decSpace
     vtxwgts <- count nvtxwgt doubSpace
 
-    parts <- fromList <$> many parserParticle
+    parts <- fromList . map (\p -> (bc p, p)) <$> many parserParticle
 
-    return $ Vertex vtxbc vtxid mom norph nout nvtxwgt vtxwgts parts
+    -- TODO
+    -- find bcs twice; only need to once
+    let v = Vertex vtxbc vtxid mom norph nout nvtxwgt vtxwgts $ keys parts
+
+    return (v, parts)
