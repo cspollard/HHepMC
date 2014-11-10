@@ -1,6 +1,6 @@
 module Data.HepMC.EventInfo where
 
-import Data.HepMC.Parser.Common
+import Data.HepMC.Parser
 
 data EventInfo = EventInfo {
     eventNumber :: Int,
@@ -9,9 +9,9 @@ data EventInfo = EventInfo {
     alphaQCD :: Double,
     alphaQED :: Double,
     signalProcessID :: Int,
-    signalProcessBarcode :: Int,
+    signalProcessBC :: Int,
     nVertices :: Int,
-    beamParticleBarcodes :: (Int, Int),
+    beamParticleBCs :: (Int, Int),
     nRndmStateInts :: Int,
     rndmStateInts :: [Int],
     nEventWeights :: Int,

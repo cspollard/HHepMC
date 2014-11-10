@@ -3,7 +3,7 @@ module Data.HepMC.Event where
 import Data.IntMap (insert, union)
 import qualified Data.IntMap as IM (empty)
 
-import Data.HepMC.Parser.Common
+import Data.HepMC.Parser
 import Data.HepMC.EventHeader
 import Data.HepMC.Barcoded
 import Data.HepMC.Vertex

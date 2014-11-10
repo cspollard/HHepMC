@@ -1,6 +1,6 @@
 module Data.HepMC.XYZT where
 
-import Data.HepMC.Parser.Common
+import Data.HepMC.Parser
 import Data.HepMC.FourMomentum
 
 data XYZT = XYZT Double Double Double Double

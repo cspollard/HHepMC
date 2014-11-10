@@ -3,7 +3,7 @@
 module Data.HepMC.HepMCFile where
 
 import Data.Text.Lazy (Text, fromStrict)
-import Data.HepMC.Parser.Common
+import Data.HepMC.Parser
 import Data.HepMC.Event
 
 type Version = Text

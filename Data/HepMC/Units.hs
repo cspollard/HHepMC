@@ -2,7 +2,7 @@
 
 module Data.HepMC.Units where
 
-import Data.HepMC.Parser.Common
+import Data.HepMC.Parser
 
 data UnitMomentum = MEV | GEV deriving (Eq, Ord, Read, Show)
 data UnitLength = MM | CM deriving (Eq, Ord, Read, Show)

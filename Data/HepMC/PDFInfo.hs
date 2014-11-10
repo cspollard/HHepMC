@@ -1,6 +1,6 @@
 module Data.HepMC.PDFInfo where
 
-import Data.HepMC.Parser.Common
+import Data.HepMC.Parser
 
 data PDFInfo = PDFInfo {
     pdfID1 :: Int,

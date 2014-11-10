@@ -1,10 +1,11 @@
 module Data.HepMC.Particle where
 
-import Data.HepMC.Parser.Common
+import Data.IntMap (IntMap)
+import Data.HepMC.Parser
 import Data.HepMC.FourMomentum
 import Data.HepMC.XYZT
 import Data.HepMC.Barcoded
-import Data.IntMap (IntMap)
+import Data.HepMC.PID
 
 data Particle = Particle {
     partBC :: BC,
@@ -14,7 +15,7 @@ data Particle = Particle {
     partStatus :: Int,
     polarizationTheta :: Double,
     polarizationPhi :: Double,
-    parentVertexBarcode :: Int,
+    parentVertexBC :: Int,
     nFlows :: Int,
     flows :: [(Int, Int)]
 } deriving (Read, Show)
@@ -24,12 +25,13 @@ instance Barcoded Particle where
     bc = partBC
 
 
+-- same barcode -> same particle
 instance Eq Particle where
     (==) = liftBC2 (==)
 
 
-instance Ord Particle where
-    compare = liftBC2 compare
+instance HasPID Particle where
+    pid = pdgID
 
 
 type Particles = IntMap Particle
