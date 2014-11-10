@@ -1,4 +1,4 @@
-module Data.HepMC.Parser.Common (
+module Data.HepMC.Parser (
     module Control.Applicative,
     module Data.Functor,
     module Data.Attoparsec.Text.Lazy,
