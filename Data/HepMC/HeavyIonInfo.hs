@@ -1,6 +1,6 @@
 module Data.HepMC.HeavyIonInfo where
 
-import Data.HepMC.Parser
+import Data.HepMC.Parse
 
 data HeavyIonInfo = HeavyIonInfo {
     nHardScatters :: Int,

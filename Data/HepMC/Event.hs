@@ -3,7 +3,7 @@ module Data.HepMC.Event where
 import Data.IntMap (insert, union)
 import qualified Data.IntMap as IM (empty)
 
-import Data.HepMC.Parser
+import Data.HepMC.Parse
 import Data.HepMC.EventHeader
 import Data.HepMC.Barcoded
 import Data.HepMC.Vertex
@@ -14,7 +14,7 @@ data Event = Event {
     eventHeader :: EventHeader,
     eventVertices :: Vertices,
     eventParticles :: Particles
-} deriving (Eq, Ord, Read, Show)
+} deriving (Read, Show)
 
 
 parserEvent :: Parser Event

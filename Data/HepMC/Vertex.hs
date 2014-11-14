@@ -1,6 +1,6 @@
 module Data.HepMC.Vertex where
 
-import Data.HepMC.Parser
+import Data.HepMC.Parse
 import Data.HepMC.XYZT
 import Data.HepMC.FourMomentum
 import Data.HepMC.Barcoded

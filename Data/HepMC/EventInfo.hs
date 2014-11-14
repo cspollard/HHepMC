@@ -1,6 +1,6 @@
 module Data.HepMC.EventInfo where
 
-import Data.HepMC.Parser
+import Data.HepMC.Parse
 
 data EventInfo = EventInfo {
     eventNumber :: Int,

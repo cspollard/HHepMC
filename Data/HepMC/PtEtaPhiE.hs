@@ -1,6 +1,6 @@
 module XYZT where
 
-import Data.HepMC.Parser
+import Data.HepMC.Parse
 import Data.HepMC.FourMomentum
 
 data PtEtaPhiE = PtEtaPhiE Double Double Double Double

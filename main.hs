@@ -1,6 +1,6 @@
 module Main where
 
-import Data.HepMC.Parser.Common
+import Data.HepMC.Parse
 import Data.HepMC.HepMCFile hiding (events)
 import Data.HepMC.Event
 import Data.Text.Lazy (Text)
