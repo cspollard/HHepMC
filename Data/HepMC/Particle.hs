@@ -15,7 +15,7 @@ data Particle = Particle {
     partStatus :: Int,
     polarizationTheta :: Double,
     polarizationPhi :: Double,
-    parentVertexBC :: Int,
+    parentVtxBC :: Int,
     nFlows :: Int,
     flows :: [(Int, Int)]
 } deriving (Read, Show)
