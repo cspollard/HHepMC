@@ -19,8 +19,8 @@ data EventInfo = EventInfo {
 } deriving (Eq, Ord, Read, Show)
 
 
-parseEventInfo :: Parser EventInfo
-parseEventInfo = do
+parserEventInfo :: Parser EventInfo
+parserEventInfo = do
     _ <- char 'E'<* skipSpace
     en <- decSpace
     nmpi <- decSpace

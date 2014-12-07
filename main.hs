@@ -12,16 +12,16 @@ main :: IO ()
 main = do
     text <- TIO.readFile =<< fmap head getArgs
 
-    r <- return $ parse (skipSpace *> parserVersion) text
+    let r = parse (skipSpace *> parserVersion) text
 
     case r of
         Done t _ -> events t
         _ -> print "error"
 
 
--- this is the answer.
+-- loop over and print all events
 events :: Text -> IO ()
-events t = do
+events t =
     case parse parserEvent t of
         Done t' evt -> do
             print evt

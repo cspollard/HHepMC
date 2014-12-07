@@ -15,5 +15,5 @@ instance FourMomentum XYZT where
 toXYZT :: FourMomentum a => a -> XYZT
 toXYZT v = XYZT (xV v) (yV v) (zV v) (tV v)
 
-parseXYZT :: Parser XYZT
-parseXYZT = XYZT <$> doubSpace <*> doubSpace <*> doubSpace <*> double
+parserXYZT :: Parser XYZT
+parserXYZT = XYZT <$> doubSpace <*> doubSpace <*> doubSpace <*> double
