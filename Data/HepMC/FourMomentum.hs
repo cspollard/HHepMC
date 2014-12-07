@@ -62,7 +62,7 @@ class Eq v => FourMomentum v where
     phiV :: v -> Double
     phiV w = atan2 (yV w) (xV w)
 
-    dRV :: v -> v -> Double
+    dRV :: FourMomentum y => v -> y -> Double
     dRV x w = sqrt(sq deta + sq dphi)
         where
             deta = etaV x - etaV w
