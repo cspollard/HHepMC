@@ -1,3 +1,7 @@
-module Data.HJet where
+module Data.Jet where
 
-import Data.HJet.ClusterStrategy
+import Data.Jet.ClusterStrategy
+import Data.Jet.PseudoJet
+
+
+cluster :: ClusterStrategy -> [PseudoJet] -> [PseudoJet]
