@@ -1,10 +1,22 @@
 module Data.Jet.PseudoJet where
 
+import Data.IntMap (IntMap)
+
 import Data.HepMC.FourMomentum
 import Data.HepMC.XYZT
 import Data.HepMC.Barcoded
 
+
 data PseudoJet = PseudoJet BC XYZT (Maybe (PseudoJet, PseudoJet))
+
+type PseudoJets = IntMap PseudoJet
+
+data PJPair = PJPair Double BC BC
+
+
+daughters :: PseudoJet -> Maybe (PseudoJet, PseudoJet)
+daughters (PseudoJet _ _ d) = d
+
 
 instance Barcoded PseudoJet where
     bc (PseudoJet b _ _) = b
@@ -16,8 +28,11 @@ instance Ord PseudoJet where
     compare = liftBC2 compare
 
 
+instance HasFourMom PseudoJet where
+    fourMom (PseudoJet _ v _) = v
+
 instance FourMomentum PseudoJet where
-    xV (PseudoJet v _) = xV v
-    yV (PseudoJet v _) = yV v
-    zV (PseudoJet v _) = zV v
-    tV (PseudoJet v _) = tV v
+    xV = xV . fourMom
+    yV = yV . fourMom
+    zV = zV . fourMom
+    tV = tV . fourMom

@@ -6,9 +6,6 @@ sq x = x*x
 sqrt' :: (Ord a, Floating a) => a -> a
 sqrt' x = if x < 0 then (- sqrt x) else sqrt x
 
-class HasFourMom v where
-    fourMom :: (FourMomentum a) => v -> a
-
 -- minimum definition: xV, yV, zV, tV
 class Eq v => FourMomentum v where
     xV :: v -> Double
@@ -70,10 +67,3 @@ class Eq v => FourMomentum v where
         where
             deta = etaV x - etaV w
             dphi = phiV x - phiV w
-
-
-instance HasFourMom v => FourMomentum v where
-    xV = xV . fourMom
-    yV = yV . fourMom
-    zV = zV . fourMom
-    tV = tV . fourMom

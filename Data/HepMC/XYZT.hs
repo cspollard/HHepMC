@@ -6,6 +6,9 @@ import Data.HepMC.FourMomentum
 data XYZT = XYZT Double Double Double Double
     deriving (Eq, Ord, Read, Show)
 
+class HasFourMom b where
+    fourMom :: b -> XYZT
+
 instance FourMomentum XYZT where
     xV (XYZT x _ _ _) = x
     yV (XYZT _ y _ _) = y
