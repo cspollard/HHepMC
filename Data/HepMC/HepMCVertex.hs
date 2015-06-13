@@ -1,68 +1,68 @@
-module Data.HepMC.Vertex where
+module Data.HepMC.HepMCVertex where
 
 import Data.HepMC.Parse
 import Data.HepMC.XYZT
 import Data.HepMC.FourMomentum
 import Data.HepMC.Barcoded
 import Data.HepMC.Particle
-import Data.IntMap (IntMap, fromList, keys)
+import Data.IntMap (IntMap, keys)
 
 
-data Vertex = Vertex {
+data HepMCVertex = HepMCVertex {
     vtxBC :: Int,
     vtxID :: Int,
     vtxFourVec :: XYZT,
-    nOrphan :: Int,
-    nOutgoing :: Int,
-    nVtxWeights :: Int,
+    vtxNOrphan :: Int,
+    vtxNOutgoing :: Int,
+    vtxNWeights :: Int,
     vtxWeights :: [Double],
     vtxPartBCs :: [Int]
 } deriving (Read, Show)
 
 
-instance Barcoded Vertex where
+instance Barcoded HepMCVertex where
     bc = vtxBC
 
 
-instance Eq Vertex where
+instance Eq HepMCVertex where
     (==) = liftBC2 (==)
 
 
-instance Ord Vertex where
+instance Ord HepMCVertex where
     compare = liftBC2 compare
 
 
-instance FourMomentum Vertex where
+instance FourMomentum HepMCVertex where
     xV = xV . vtxFourVec
     yV = yV . vtxFourVec
     zV = zV . vtxFourVec
     tV = tV . vtxFourVec
 
 
-type Vertices = IntMap Vertex
+type HepMCVertices = IntMap HepMCVertex
 
 
-class HasVertices hp where
-    vertices :: hp -> Vertices
+class HasHepMCVertices hp where
+    vertices :: hp -> HepMCVertices
 
 
-parserVertParts :: Parser (Vertex, Particles)
+parserVertParts :: Parser (HepMCVertex, Particles)
 parserVertParts = do
     _ <- char 'V' <* skipSpace
     vtxbc <- decSpace
     vtxid <- decSpace
 
-    mom <- parseXYZT <* skipSpace
+    mom <- parserXYZT <* skipSpace
 
     norph <- decSpace
     nout <- decSpace
     nvtxwgt <- decSpace
     vtxwgts <- count nvtxwgt doubSpace
 
-    parts <- fromList . map (\p -> (bc p, p)) <$> many parserParticle
+    parts <- fromListBC <$> many parserParticle
 
     -- TODO
     -- find bcs twice; only need to once
-    let v = Vertex vtxbc vtxid mom norph nout nvtxwgt vtxwgts $ keys parts
+    let v = HepMCVertex vtxbc vtxid mom norph nout nvtxwgt vtxwgts $ keys parts
 
     return (v, parts)

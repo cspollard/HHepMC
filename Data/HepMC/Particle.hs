@@ -47,6 +47,10 @@ instance FourMomentum Particle where
     tV = tV . partFourMom
 
 
+daughters :: Particle -> [Particle]
+daughters = parentVtxBC 
+
+
 parserParticle :: Parser Particle
 parserParticle = do
     _ <- char 'P' <* skipSpace
@@ -54,7 +58,7 @@ parserParticle = do
     pdgid <- decSpace
 
 
-    mom <- parseXYZT <* skipSpace
+    mom <- parserXYZT <* skipSpace
 
     m <- doubSpace
     stat <- decSpace

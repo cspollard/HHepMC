@@ -3,6 +3,7 @@ module Main where
 import Data.HepMC.Parse
 import Data.HepMC.HepMCFile hiding (events)
 import Data.HepMC.Event
+import Data.HepMC.Particle
 import Data.Text.Lazy (Text)
 import qualified Data.Text.Lazy.IO as TIO (readFile)
 import System.Environment (getArgs)
@@ -24,6 +25,6 @@ events :: Text -> IO ()
 events t =
     case parse parserEvent t of
         Done t' evt -> do
-            print evt
+            print $ particles evt
             events t'
         _ -> return ()

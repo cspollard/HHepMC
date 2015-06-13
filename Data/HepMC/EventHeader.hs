@@ -45,7 +45,7 @@ parserHeaderLine = do
 
 parserEventHeader :: Parser EventHeader
 parserEventHeader = do
-    ei <- parseEventInfo
+    ei <- parserEventInfo
     m <- M.fromList `fmap` many parserHeaderLine
 
     let wn = maybeResult . parse parserWeightNames =<< M.lookup 'N' m
