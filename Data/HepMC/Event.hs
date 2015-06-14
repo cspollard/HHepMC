@@ -1,27 +1,24 @@
 module Data.HepMC.Event where
 
-import Data.IntMap (insert, union)
-import qualified Data.IntMap as IM (empty)
-
 import Data.HepMC.Parse
 import Data.HepMC.EventHeader
 import Data.HepMC.Barcoded
-import Data.HepMC.HepMCVertex
-import Data.HepMC.HepMCParticle
+import Data.HepMC.Vertex
+import Data.HepMC.Particle
 
 
 data Event = Event {
-    eventHeader :: EventHeader,
-    eventVertices :: Vertices,
-    eventParticles :: Particles
+    evtHeader :: EventHeader,
+    evtVertices :: Vertices,
+    evtParticles :: Particles
 } deriving (Read, Show)
 
 
 instance HasParticles Event where
-    particles = eventParticles
+    particles = evtParticles
 
 instance HasVertices Event where
-    vertices = eventVertices
+    vertices = evtVertices
 
 parserEvent :: Parser Event
 parserEvent = do
@@ -31,16 +28,3 @@ parserEvent = do
     (verts, parts) <- foldr f (IM.empty, IM.empty) <$> many parserVertParts
     
     return $ Event header verts parts
-
--- This appears to be what I want:
-data HepMCEventGraph = HepMCEventGraph HepMCVertex
-
-data HepMCParticle = HepMCParticle HepMCVertices
-
-type HepMCVertices = [HepMCVertex]
-type HepMCParticles = [HepMCParticle]
-
-mkGraph :: [(a, Int)] -> Graph a
-mkGraph table = table' ! 0
-    where table' = listArray (0, length table - 1) $
-            map (\(x, n) -> GNode x (table' ! n)) table
