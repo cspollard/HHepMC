@@ -5,6 +5,7 @@ import Data.HepMC.File hiding (events)
 import Data.HepMC.Event
 import Data.HepMC.Vertex
 import Data.HepMC.XYZT
+import Data.HepMC.FourMomentum
 import Data.Text.Lazy (Text)
 import qualified Data.Text.Lazy.IO as TIO (readFile)
 import System.Environment (getArgs)
@@ -23,7 +24,7 @@ main = do
 
 
 printEvent :: Event -> IO ()
-printEvent = print . (fourMom . head . tail . tail . tail . egParts . evtGraph)
+printEvent = print . filter ((<) 25) . fmap ptV . egParts . evtGraph
 
 
 -- loop over and print all events

@@ -3,34 +3,31 @@ module Data.HepMC.FourMomentum where
 sq :: Num a => a -> a
 sq x = x*x
 
-sqrt' :: (Ord a, Floating a) => a -> a
-sqrt' x = if x < 0 then (- sqrt x) else sqrt x
-
 -- minimum definition: xV, yV, zV, tV
-class Eq v => FourMomentum v where
+class FourMomentum v where
     xV :: v -> Double
-    xV = pxV
+    xV w = ptV w * cos (phiV w)
 
     yV :: v -> Double
-    yV = pyV
+    yV w = ptV w * sin (phiV w)
 
     zV :: v -> Double
-    zV = pzV
+    zV w = pV w * sin (thetaV w)
 
     tV :: v -> Double
-    tV = eV
+    tV w = sqrt (p2V w + m2V w)
 
     pxV :: v -> Double
-    pxV w = ptV w * cos (phiV w)
+    pxV = xV
 
     pyV :: v -> Double
-    pyV w = ptV w * sin (phiV w)
+    pyV = yV
 
     pzV :: v -> Double
-    pzV w = pV w * sin (thetaV w)
+    pzV = zV
 
     eV :: v -> Double
-    eV w = sqrt (p2V w + m2V w)
+    eV = tV
 
     pt2V :: v -> Double
     pt2V w = sq (pxV w) + sq (pyV w)
@@ -48,7 +45,7 @@ class Eq v => FourMomentum v where
     pV = sqrt . p2V
 
     mV :: v -> Double
-    mV = sqrt' . m2V
+    mV = sqrt . m2V
 
     etaV :: v -> Double
     etaV w = 0.5 * log ((p + z) / (p - z))
