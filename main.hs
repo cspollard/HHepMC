@@ -3,8 +3,8 @@ module Main where
 import Data.HepMC.Parse
 import Data.HepMC.File hiding (events)
 import Data.HepMC.Event
-import Data.HepMC.Vertex
 import Data.HepMC.PID
+import Data.HepMC.Vertex
 import Data.HepMC.FourMomentum
 import Data.Text.Lazy (Text)
 import qualified Data.Text.Lazy.IO as TIO (readFile)
@@ -24,7 +24,7 @@ main = do
 
 
 printEvent :: Event -> IO ()
-printEvent = print . filter (\p -> ptV p > 100 && elem (pid p) [-16, -14, -12, 12, 14, 16]) . egParts . evtGraph
+printEvent = print . filter (\p -> ptV p > 100 && (p `ofType` neutrinos) ) . egParts . evtGraph
 
 
 -- loop over and print all events

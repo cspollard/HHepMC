@@ -2,13 +2,25 @@ module Data.HepMC.PID where
 
 import Data.Set
 
+-- TODO
+-- Integer?
 type PID = Int
 
 class HasPID hp where
     pid :: hp -> PID
 
-    abspid :: hp -> PID
-    abspid = abs . pid
+abspid :: HasPID hp => hp -> PID
+abspid = abs . pid
+
+
+electron, eNeutrino, muon, mNeutrino, tau, tNeutrino :: Int
+
+down, up, strange, charm, bottom, top :: Int
+
+gluon, photon, gamma, z, wplus, wminus :: Int
+
+h, hplus, hminus :: Int
+
 
 electron = 11
 eNeutrino = 12
@@ -49,9 +61,6 @@ neutrinos = fromList [eNeutrino, -eNeutrino,
 
 leptons = union chargedLeptons neutrinos
 
-isNeutrino = member neutrinos
-isChargedLepton = member chargedLeptons
-isLepton = member leptons
 
 
 downTypeQuarks = fromList [down, -down,
@@ -65,14 +74,12 @@ upTypeQuarks = fromList [up, -up,
 
 quarks = union downTypeQuarks upTypeQuarks
 
-isDownTypeQUark = member downTypeQuarks
-isUpTypeQUark = member upTypeQuarks
-isQuark = member quarks
-
 partons = insert gluon quarks
-
-isParton = member partons
 
 weakBosons = fromList [z, wplus, wminus]
 
 ewBosons = insert photon weakBosons
+
+
+ofType :: HasPID hp => hp -> Set PID -> Bool
+ofType p = member (pid p)
