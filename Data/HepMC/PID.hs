@@ -1,3 +1,8 @@
+{-
+ - taken from
+ - http://pdg.lbl.gov/2002/montecarlorpp.pdf
+ -}
+
 module Data.HepMC.PID where
 
 import Data.Set
@@ -5,6 +10,8 @@ import Data.Set
 -- TODO
 -- Integer?
 type PID = Int
+
+type PIDSet = Set PID
 
 class HasPID hp where
     pid :: hp -> PID
@@ -45,11 +52,15 @@ z = 23
 wplus = 24
 wminus = -wplus
 
+-- TODO
+-- BSM higgses...
+-- a0?
+-- h0?
+
 h = 25
 
 hplus = 37
 hminus = -hplus
-
 
 chargedLeptons = fromList [electron, -electron,
                            muon, -muon,
@@ -81,5 +92,26 @@ weakBosons = fromList [z, wplus, wminus]
 ewBosons = insert photon weakBosons
 
 
-ofType :: HasPID hp => hp -> Set PID -> Bool
+diquark p = 1000 < p && p < 7000
+hadron p = nq2 p > 0 && nq2 p > 0
+meson p = hadron p && nq1 p == 0
+baryon p = hadron p && nq1 p > 0
+
+digit :: (Integral a) => a -> a -> a
+digit x n = div x (10^n) `mod` 10
+
+nJ = flip digit 0
+nq3 = flip digit 1
+nq2 = flip digit 2
+nq1 = flip digit 3
+nL = flip digit 4
+nr = flip digit 5
+n = flip digit 6
+
+hasQuark q p = or . fmap ( (==) q . ($ p) ) $ [nq1, nq2, nq3]
+
+hasBottomQuark = hasQuark bottom
+hasCharmQuark = hasQuark charm
+
+ofType :: HasPID hp => hp -> PIDSet -> Bool
 ofType p = member (pid p)
