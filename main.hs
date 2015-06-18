@@ -4,12 +4,11 @@ import Data.HepMC.Parse
 import Data.HepMC.File hiding (events)
 import Data.HepMC.Event
 import Data.HepMC.Vertex
-import Data.HepMC.XYZT
+import Data.HepMC.PID
 import Data.HepMC.FourMomentum
 import Data.Text.Lazy (Text)
 import qualified Data.Text.Lazy.IO as TIO (readFile)
 import System.Environment (getArgs)
-import Control.Monad (forever)
 
 
 main :: IO ()
@@ -24,7 +23,7 @@ main = do
 
 
 printEvent :: Event -> IO ()
-printEvent = print . filter ((<) 25) . fmap ptV . egParts . evtGraph
+printEvent = print . fmap (vtxID . partParentVtx) . filter (\p -> ptV p > 100 && elem (pid p) [-16, -14, -12, 12, 14, 16]) . egParts . evtGraph
 
 
 -- loop over and print all events
