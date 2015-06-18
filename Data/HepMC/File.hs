@@ -11,7 +11,7 @@ type Version = Text
 data File = File {
     version :: Version,
     events :: [Event]
-} deriving Show
+}
 
 
 parserVersion :: Parser Version

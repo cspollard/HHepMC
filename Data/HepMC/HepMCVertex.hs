@@ -17,8 +17,7 @@ data HepMCVertex = HepMCVertex {
     hvtxNOrphan :: Int,
     hvtxNOutgoing :: Int,
     hvtxNWeights :: Int,
-    hvtxWeights :: [Double],
-    hvtxChildParts :: [HepMCParticle]
+    hvtxWeights :: [Double]
 } deriving (Read, Show)
 
 
@@ -34,7 +33,6 @@ instance Ord HepMCVertex where
 
 data HepMCParticle = HepMCParticle {
     hpartBC :: BC,
-    hpartParentVtxBC :: BC,
     hpartPID :: Int,
     hpartPX :: Double,
     hpartPY :: Double,
@@ -60,7 +58,7 @@ instance Ord HepMCParticle where
     compare = liftBC2 compare
 
 
-toVertex :: HepMCVertex -> Particles -> Particles -> Vertex
+toVertex :: HepMCVertex -> Vertex
 toVertex v = 
         Vertex (hvtxID v)
             (XYZT (hvtxX v) (hvtxY v) (hvtxZ v) (hvtxCTau v))
@@ -84,12 +82,10 @@ parserHepMCVertex = do
     nvtxwgt <- decSpace
     vtxwgts <- count nvtxwgt doubSpace
 
-    parts <- many1' $ parserHepMCParticle vtxbc
-
-    return $ HepMCVertex vtxbc vtxid x y z ctau norph nout nvtxwgt vtxwgts parts
+    return $ HepMCVertex vtxbc vtxid x y z ctau norph nout nvtxwgt vtxwgts
 
 
-toParticle :: HepMCParticle -> Vertex -> Maybe Vertex -> Particle
+toParticle :: HepMCParticle -> Particle
 toParticle p =
         Particle (hpartPID p)
             (XYZT (hpartPX p) (hpartPY p) (hpartPZ p) (hpartE p))
@@ -104,8 +100,8 @@ toParticle p =
 -- should this just parse to
 -- Vector Vertices -> Particle ??
 -- how then would we deal with the particle -> vertex link?
-parserHepMCParticle :: BC -> Parser HepMCParticle
-parserHepMCParticle parentVtxBC = do
+parserHepMCParticle :: Parser HepMCParticle
+parserHepMCParticle = do
     _ <- char 'P' *> skipSpace
 
     bcode <- decSpace
@@ -125,4 +121,4 @@ parserHepMCParticle parentVtxBC = do
 
     fs <- count nf $ tuple decSpace decSpace
 
-    return $ HepMCParticle bcode parentVtxBC pdgid px py pz e m stat ptheta pphi cvbc nf fs
+    return $ HepMCParticle bcode pdgid px py pz e m stat ptheta pphi cvbc nf fs

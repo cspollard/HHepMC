@@ -4,80 +4,76 @@ import Data.HepMC.Parse
 import Data.HepMC.HepMCVertex
 import Data.HepMC.EventHeader
 import Data.HepMC.Barcoded
-import Data.Array
-import Data.Tuple (swap)
 import Data.HepMC.Vertex
-import qualified Data.Foldable as F
+import Data.Either
+import Data.ABGraph
+import Data.List (sortBy, sort)
+import Data.Array
 
 
 data Event = Event {
     evtHeader :: EventHeader,
     evtGraph :: EventGraph
-} deriving (Show)
+}
 
 parserEvent :: Parser Event
 parserEvent = Event <$> parserEventHeader <*> parserEventGraph
 
 parserEventGraph :: Parser EventGraph
-parserEventGraph = makeEventGraph <$> many' parserHepMCVertex
+parserEventGraph = makeEventGraph <$> many' (eitherP parserHepMCVertex parserHepMCParticle)
 
 
 -- TODO
 -- direct link to HS vertex?
-data EventGraph = EventGraph {
-    egVerts :: Vertices,
-    egParts :: Particles
-} deriving (Read, Show)
+type EventNode = ABNode Vertex Particle
+type EventGraph = ABGraph Vertex Particle
+
+egVerts :: EventGraph -> [Vertex]
+egVerts = map aValue . aNodes
+
+egParts :: EventGraph -> [Particle]
+egParts = map bValue . bNodes
+
+egVertNodesArray :: EventGraph -> Array Int EventNode
+egVertNodesArray = aNodesArray
+
+egPartNodesArray :: EventGraph -> Array Int EventNode
+egPartNodesArray = bNodesArray
+
+type HMCObj = Either HepMCVertex HepMCParticle
+type Obj = Either Vertex Particle
 
 
-makeEventGraph :: [HepMCVertex] -> EventGraph
-makeEventGraph hmcverts = EventGraph (elems vertsarr) (elems partsarr)
+-- TODO
+-- we could also assemble the list of hverts and hparts here...
+-- buildLinks compiles the edges of the event graph
+buildLinks :: [HMCObj] -> ([(BC, BC)], [(BC, BC)])
+buildLinks hmcobjs = buildLinks' hmcobjs 0 ([], [])
     where
-
-        barcodeIt b = (bc b, b)
-
-        -- array of Vertex
-        vertsarr :: Array Int Vertex
-        vertsarr = let l = map toVertex' hmcverts in
-                    listArray (-1, negate $ length l) l
-
-        -- array of Particle
-        partsarr :: Array Int Particle
-        partsarr = let l = concatMap vtxChildParts $ elems vertsarr in
-                    listArray (1, length l) l
+        buildLinks' :: [HMCObj] -> BC -> ([(BC, BC)], [(BC, BC)]) -> ([(BC, BC)], [(BC, BC)])
+        buildLinks' [] _ links = links
+        buildLinks' (obj:objs) vtxBC links@(vplinks, pvlinks) =
+            case obj of
+                -- we're at a new vertex.
+                Left vert -> buildLinks' objs (bc vert) links
+                -- add the vertex -> child part and part -> child vertex links
+                Right part -> buildLinks' objs vtxBC
+                                ( (-vtxBC, bc part) : vplinks,
+                                  (bc part, hpartChildVtxBC part) : pvlinks)
 
 
-        toParticle' :: HepMCParticle -> Vertex -> Particle
-        toParticle' p v = toParticle p v childVtx
-            where
-                childVtx = let vbc = partchildlinksarr ! bc p in
-                                if vbc /= 0
-                                    then Just $ vertsarr ! vbc
-                                    else Nothing
 
+makeEventGraph :: [HMCObj] -> EventGraph
+makeEventGraph hobjs = buildGraph vertsList partsList vplinks pvlinks
+    where
+        -- TODO we have already done this in buildLinks
+        (hvertsList, hpartsList) = partitionEithers hobjs
 
-        toVertex' :: HepMCVertex -> Vertex
-        toVertex' v = toVertex v (map (partsarr !) (vertparentlinksarr ! bc v)) (childParts v)
+        (vplinks, pvlinks) = buildLinks hobjs
 
-        childParts :: HepMCVertex -> Particles
-        childParts v = map (flip toParticle' $ vertsarr ! bc v) $ hvtxChildParts v
-
-
-        -- array of all HepMCVertices
-        hmcvertsarr = array (-(length hmcverts), -1) $
-                        map barcodeIt hmcverts
-
-        -- array of all HepMCParticles
-        hmcpartsarr = array (1, length l) $ map barcodeIt l
-            where l = F.concat . fmap hvtxChildParts $ hmcvertsarr
-
-        -- links from particles to child vertices
-        partchildlinksarr = fmap hpartChildVtxBC hmcpartsarr
-
-        -- links from vertices to parent particles
-        vertparentlinksarr = accumArray (flip (:)) [] (bounds hmcvertsarr) .
-                                map swap . assocs $ partchildlinksarr
-
+        -- reverse ordering of vertices
+        vertsList = map toVertex $ sortBy (flip compare) hvertsList
+        partsList = map toParticle $ sort hpartsList
 
 {-
 instance HasParticles Event where

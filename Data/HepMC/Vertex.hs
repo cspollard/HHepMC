@@ -10,9 +10,7 @@ data Vertex = Vertex {
     vtxNOrphan :: Int,
     vtxNOutgoing :: Int,
     vtxNWeights :: Int,
-    vtxWeights :: [Double],
-    vtxParentParts :: Particles,
-    vtxChildParts :: Particles
+    vtxWeights :: [Double]
 } deriving (Read, Show)
 
 type Vertices = [Vertex]
@@ -35,9 +33,7 @@ data Particle = Particle {
     partPolarizationTheta :: Double,
     partPolarizationPhi :: Double,
     partNFlows :: Int,
-    partFlows :: [(Int, Int)],
-    partParentVtx :: Vertex,
-    partChildVtx :: Maybe Vertex
+    partFlows :: [(Int, Int)]
 } deriving (Read, Show)
 
 type Particles = [Particle]

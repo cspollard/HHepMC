@@ -8,6 +8,11 @@ type BC = Int
 class Barcoded b where
     bc :: b -> BC
 
+instance (Barcoded a, Barcoded b) => Barcoded (Either a b) where
+    bc x = case x of
+            Left a -> bc a
+            Right b -> bc b
+
 
 liftBC :: Barcoded a => (BC -> b) -> a -> b
 liftBC f = f . bc
