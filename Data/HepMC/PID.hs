@@ -98,7 +98,7 @@ meson p = hadron p && nq1 p == 0
 baryon p = hadron p && nq1 p > 0
 
 digit :: (Integral a) => a -> a -> a
-digit x n = div x (10^n) `mod` 10
+digit x n = div (abs x) (10^n) `mod` 10
 
 nJ = flip digit 0
 nq3 = flip digit 1
@@ -108,7 +108,7 @@ nL = flip digit 4
 nr = flip digit 5
 n = flip digit 6
 
-hasQuark q p = or . fmap ( (==) q . ($ p) ) $ [nq1, nq2, nq3]
+hasQuark p q = or . fmap ( (==) q . ($ p) ) $ [nq1, nq2, nq3]
 
 hasBottomQuark = hasQuark bottom
 hasCharmQuark = hasQuark charm

@@ -24,7 +24,7 @@ main = do
 
 
 printEvent :: Event -> IO ()
-printEvent = print . filter (\p -> ptV p > 100 && (p `hasQuark` bottom) ) . egParts . evtGraph
+printEvent = print . filter (\p -> ptV p > 50 && pid p `hasQuark` bottom) . egParts . evtGraph
 
 
 -- loop over and print all events
