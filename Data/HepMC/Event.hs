@@ -34,6 +34,9 @@ egVerts = map aValue . aNodes
 egParts :: EventGraph -> [Particle]
 egParts = map bValue . bNodes
 
+egFinalParts :: EventGraph -> [Particle]
+egFinalParts = map bValue . filter (null . children) . bNodes
+
 egVertNodesArray :: EventGraph -> Array Int EventNode
 egVertNodesArray = aNodesArray
 

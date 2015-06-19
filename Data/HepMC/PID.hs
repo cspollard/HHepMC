@@ -115,3 +115,6 @@ hasCharmQuark = hasQuark charm
 
 ofType :: HasPID hp => hp -> PIDSet -> Bool
 ofType p = member (pid p)
+
+-- TODO
+-- K long and K short
