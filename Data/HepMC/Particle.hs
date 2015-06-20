@@ -1,4 +1,4 @@
-module Data.HepMC.Vertex where
+module Data.HepMC.Particle where
 
 import Data.HepMC.XYZT
 import Data.HepMC.FourMomentum

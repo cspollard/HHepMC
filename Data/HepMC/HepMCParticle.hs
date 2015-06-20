@@ -1,4 +1,4 @@
-module Data.HepMC.HepMCVertex where
+module Data.HepMC.HepMCParticle where
 
 import Data.HepMC.Parse
 import Data.HepMC.Barcoded

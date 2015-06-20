@@ -1,10 +1,12 @@
 module Data.HepMC.Event where
 
 import Data.HepMC.Parse
-import Data.HepMC.HepMCVertex
 import Data.HepMC.EventHeader
+import Data.HepMC.HepMCVertex
+import Data.HepMC.HepMCParticle
 import Data.HepMC.Barcoded
 import Data.HepMC.Vertex
+import Data.HepMC.Particle
 import Data.Either
 import Data.ABGraph
 import Data.List (sortBy, sort)
@@ -84,11 +86,3 @@ makeEventGraph hobjs = buildGraph vertsMap partsMap vplinks pvlinks
 
         vertsMap = IM.fromList vertsList
         partsMap = IM.fromList partsList
-
-{-
-instance HasParticles Event where
-    particles = evtParticles
-
-instance HasVertices Event where
-    vertices = evtVertices
--}
