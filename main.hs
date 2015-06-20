@@ -10,6 +10,7 @@ import Data.Text.Lazy (Text)
 import qualified Data.Text.Lazy.IO as TIO (readFile)
 import System.Environment (getArgs)
 import Data.ABGraph
+import Control.Arrow
 
 
 main :: IO ()
@@ -24,7 +25,7 @@ main = do
 
 
 printEvent :: Event -> IO ()
-printEvent = print . filter (\p -> ptV p > 100 {- && pid p `hasQuark` strange -} ) . egFinalParts . evtGraph
+printEvent = print . filter (\p -> ptV p > 100 && pid p `hasQuark` strange ) . egParts . evtGraph
 
 
 -- loop over and print all events

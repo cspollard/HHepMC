@@ -8,7 +8,8 @@ import Data.HepMC.Vertex
 import Data.Either
 import Data.ABGraph
 import Data.List (sortBy, sort)
-import Data.Array
+import Data.IntMap (IntMap)
+import qualified Data.IntMap as IM
 
 
 data Event = Event {
@@ -37,11 +38,11 @@ egParts = map bValue . bNodes
 egFinalParts :: EventGraph -> [Particle]
 egFinalParts = map bValue . filter (null . children) . bNodes
 
-egVertNodesArray :: EventGraph -> Array Int EventNode
-egVertNodesArray = aNodesArray
+egVertNodesMap :: EventGraph -> IntMap EventNode
+egVertNodesMap = aNodesMap
 
-egPartNodesArray :: EventGraph -> Array Int EventNode
-egPartNodesArray = bNodesArray
+egPartNodesMap :: EventGraph -> IntMap EventNode
+egPartNodesMap = bNodesMap
 
 type HMCObj = Either HepMCVertex HepMCParticle
 type Obj = Either Vertex Particle
@@ -61,13 +62,16 @@ buildLinks hmcobjs = buildLinks' hmcobjs 0 ([], [])
                 Left vert -> buildLinks' objs (bc vert) links
                 -- add the vertex -> child part and part -> child vertex links
                 Right part -> buildLinks' objs vtxBC
-                                ( (-vtxBC, bc part) : vplinks,
-                                  (bc part, hpartChildVtxBC part) : pvlinks)
+                                ( (vtxBC, bc part) : vplinks,
+                                    let bcode = hpartChildVtxBC part in
+                                        if bcode == 0
+                                            then pvlinks
+                                            else (bc part, bcode) : pvlinks)
 
 
 
 makeEventGraph :: [HMCObj] -> EventGraph
-makeEventGraph hobjs = buildGraph vertsList partsList vplinks pvlinks
+makeEventGraph hobjs = buildGraph vertsMap partsMap vplinks pvlinks
     where
         -- TODO we have already done this in buildLinks
         (hvertsList, hpartsList) = partitionEithers hobjs
@@ -75,8 +79,11 @@ makeEventGraph hobjs = buildGraph vertsList partsList vplinks pvlinks
         (vplinks, pvlinks) = buildLinks hobjs
 
         -- reverse ordering of vertices
-        vertsList = map toVertex $ sortBy (flip compare) hvertsList
-        partsList = map toParticle $ sort hpartsList
+        vertsList = map (\v -> (bc v, toVertex v) ) $ sortBy (flip compare) hvertsList
+        partsList = map (\p -> (bc p, toParticle p) ) $ sort hpartsList
+
+        vertsMap = IM.fromList vertsList
+        partsMap = IM.fromList partsList
 
 {-
 instance HasParticles Event where
