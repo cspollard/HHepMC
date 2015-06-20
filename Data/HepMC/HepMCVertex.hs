@@ -5,8 +5,7 @@ import Data.HepMC.Barcoded
 import Data.HepMC.Vertex
 import Data.HepMC.XYZT
 
--- temporary types that encode all hepmc info before building event
--- graph
+-- temporary type that encodes all hepmc info before building event graph
 data HepMCVertex = HepMCVertex {
     hvtxBC :: BC,
     hvtxID :: Int,
@@ -28,33 +27,6 @@ instance Eq HepMCVertex where
     (==) = liftBC2 (==)
 
 instance Ord HepMCVertex where
-    compare = liftBC2 compare
-
-
-data HepMCParticle = HepMCParticle {
-    hpartBC :: BC,
-    hpartPID :: Int,
-    hpartPX :: Double,
-    hpartPY :: Double,
-    hpartPZ :: Double,
-    hpartE :: Double,
-    hpartM :: Double,
-    hpartStatus :: Int,
-    hpartPolarizationTheta :: Double,
-    hpartPolarizationPhi :: Double,
-    hpartChildVtxBC :: Int,
-    hpartNFlows :: Int,
-    hpartFlows :: [(Int, Int)]
-} deriving (Read, Show)
-
-
-instance Barcoded HepMCParticle where
-    bc = hpartBC
-
-instance Eq HepMCParticle where
-    (==) = liftBC2 (==)
-
-instance Ord HepMCParticle where
     compare = liftBC2 compare
 
 
@@ -83,42 +55,3 @@ parserHepMCVertex = do
     vtxwgts <- count nvtxwgt doubSpace
 
     return $ HepMCVertex vtxbc vtxid x y z ctau norph nout nvtxwgt vtxwgts
-
-
-toParticle :: HepMCParticle -> Particle
-toParticle p =
-        Particle (hpartPID p)
-            (XYZT (hpartPX p) (hpartPY p) (hpartPZ p) (hpartE p))
-            (hpartM p) (hpartStatus p)
-            (hpartPolarizationTheta p)
-            (hpartPolarizationPhi p)
-            (hpartNFlows p)
-            (hpartFlows p)
-
-
--- TODO
--- should this just parse to
--- Vector Vertices -> Particle ??
--- how then would we deal with the particle -> vertex link?
-parserHepMCParticle :: Parser HepMCParticle
-parserHepMCParticle = do
-    _ <- char 'P' *> skipSpace
-
-    bcode <- decSpace
-    pdgid <- decSpace
-
-    px <- doubSpace
-    py <- doubSpace
-    pz <- doubSpace
-    e <- doubSpace
-
-    m <- doubSpace
-    stat <- decSpace
-    ptheta <- doubSpace
-    pphi <- doubSpace
-    cvbc <- decSpace
-    nf <- decSpace
-
-    fs <- count nf $ tuple decSpace decSpace
-
-    return $ HepMCParticle bcode pdgid px py pz e m stat ptheta pphi cvbc nf fs
