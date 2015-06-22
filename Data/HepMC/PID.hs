@@ -108,13 +108,10 @@ nL = flip digit 4
 nr = flip digit 5
 n = flip digit 6
 
-hasQuark p q = or . fmap ( (==) q . ($ p) ) $ [nq1, nq2, nq3]
+hasQuark p q = (hadron p || diquark p) && (or . fmap ( (==) q . ($ p) ) $ [nq1, nq2, nq3])
 
 hasBottomQuark = flip hasQuark bottom
 hasCharmQuark = flip hasQuark charm
 
 ofType :: HasPID hp => hp -> PIDSet -> Bool
 ofType p = member (pid p)
-
--- TODO
--- K long and K short
