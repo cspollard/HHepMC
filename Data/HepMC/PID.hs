@@ -3,6 +3,8 @@
  - http://pdg.lbl.gov/2002/montecarlorpp.pdf
  -}
 
+-- TODO
+-- a lot of this needs to be hidden.
 module Data.HepMC.PID where
 
 import Data.Set
@@ -12,6 +14,9 @@ import Data.Set
 type PID = Int
 
 type PIDSet = Set PID
+
+-- TODO
+-- tagged union PIDClass?
 
 class HasPID hp where
     pid :: hp -> PID
@@ -115,3 +120,18 @@ hasCharmQuark = flip hasQuark charm
 
 ofType :: HasPID hp => hp -> PIDSet -> Bool
 ofType p = member (pid p)
+
+isType :: HasPID hp => hp -> PID -> Bool
+isType = (==) . pid
+
+isQuark, isChargedLepton, isNeutrino, isLepton :: HasPID hp => hp -> Bool
+isQuark p = p `ofType` quarks
+isChargedLepton p = p `ofType` chargedLeptons
+isNeutrino p = p `ofType` neutrinos
+isLepton p = p `ofType` leptons
+
+isHadron, isMeson, isBaryon, isDiquark :: HasPID hp => hp -> Bool
+isDiquark = diquark . pid
+isHadron = hadron . pid
+isMeson = meson . pid
+isBaryon = baryon . pid
