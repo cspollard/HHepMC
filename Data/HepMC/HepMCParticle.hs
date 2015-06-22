@@ -2,8 +2,8 @@ module Data.HepMC.HepMCParticle where
 
 import Data.HepMC.Parse
 import Data.HepMC.Barcoded
-import Data.HepMC.Particle
 import Data.HepMC.XYZT
+import Data.HepMC.Vertex
 
 -- temporary type that encodes all hepmc info before building event graph
 data HepMCParticle = HepMCParticle {
@@ -17,7 +17,7 @@ data HepMCParticle = HepMCParticle {
     hpartStatus :: Int,
     hpartPolarizationTheta :: Double,
     hpartPolarizationPhi :: Double,
-    hpartChildVtxBC :: Int,
+    hpartChildVertBC :: Int,
     hpartNFlows :: Int,
     hpartFlows :: [(Int, Int)]
 } deriving (Read, Show)
@@ -33,9 +33,9 @@ instance Ord HepMCParticle where
     compare = liftBC2 compare
 
 
-toParticle :: HepMCParticle -> Particle
+toParticle :: HepMCParticle -> Vertices -> Vertices -> Particle
 toParticle p =
-        Particle (hpartPID p)
+        Particle (hpartBC p) (hpartPID p)
             (XYZT (hpartPX p) (hpartPY p) (hpartPZ p) (hpartE p))
             (hpartM p) (hpartStatus p)
             (hpartPolarizationTheta p)

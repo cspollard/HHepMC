@@ -93,7 +93,7 @@ ewBosons = insert photon weakBosons
 
 
 diquark p = 1000 < p && p < 7000
-hadron p = nq2 p > 0 && nq2 p > 0
+hadron p = nq2 p > 0 && nq3 p > 0
 meson p = hadron p && nq1 p == 0
 baryon p = hadron p && nq1 p > 0
 
@@ -110,8 +110,8 @@ n = flip digit 6
 
 hasQuark p q = or . fmap ( (==) q . ($ p) ) $ [nq1, nq2, nq3]
 
-hasBottomQuark = hasQuark bottom
-hasCharmQuark = hasQuark charm
+hasBottomQuark = flip hasQuark bottom
+hasCharmQuark = flip hasQuark charm
 
 ofType :: HasPID hp => hp -> PIDSet -> Bool
 ofType p = member (pid p)

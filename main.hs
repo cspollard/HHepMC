@@ -3,13 +3,13 @@ module Main where
 import Data.HepMC.Parse
 import Data.HepMC.File hiding (events)
 import Data.HepMC.Event
+import Data.HepMC.EventGraph
 import Data.HepMC.PID
 import Data.HepMC.Vertex
 import Data.HepMC.FourMomentum
 import Data.Text.Lazy (Text)
 import qualified Data.Text.Lazy.IO as TIO (readFile)
 import System.Environment (getArgs)
-import Data.ABGraph
 import Control.Arrow
 
 
@@ -25,7 +25,7 @@ main = do
 
 
 printEvent :: Event -> IO ()
-printEvent = print . filter (\p -> ptV p > 100 && pid p `hasQuark` strange ) . egParts . evtGraph
+printEvent = print . filter (\n' -> or . map (\p -> let pID = pid p in hasBottomQuark pID && hadron pID) . ancestors $ n') . egFinalParts . evtGraph
 
 
 -- loop over and print all events
