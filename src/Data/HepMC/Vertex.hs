@@ -1,6 +1,6 @@
 module Data.HepMC.Vertex where
 
-import Data.HepMC.PID
+import Data.HEP.PID
 import Data.HepMC.XYZT
 import Data.HepMC.FourMomentum
 import Data.HepMC.Barcoded
@@ -34,6 +34,9 @@ data Particle = Particle {
 
 
 type Vertices = [Vertex]
+
+class HasVertices hv where
+    vertices :: hv -> Vertices
 
 instance Barcoded Vertex where
     bc = vertBC
@@ -76,3 +79,6 @@ instance FourMomentum Particle where
 
 instance HasPID Particle where
     pid = partPID
+
+class HasParticles hp where
+    particles :: hp -> Particles
