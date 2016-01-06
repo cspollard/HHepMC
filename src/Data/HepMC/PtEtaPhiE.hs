@@ -1,4 +1,4 @@
-module XYZT where
+module Data.HepMC.PtEtaPhiE where
 
 import Data.HepMC.Parse
 import Data.HepMC.FourMomentum
