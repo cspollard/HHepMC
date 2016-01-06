@@ -16,13 +16,15 @@ data PDFInfo = PDFInfo {
 
 
 parserPDFInfo :: Parser PDFInfo
-parserPDFInfo = PDFInfo <$>
-                decSpace <*>
-                decSpace <*>
-                doubSpace <*>
-                doubSpace <*>
-                doubSpace <*>
-                doubSpace <*>
-                doubSpace <*>
-                decSpace <*>
-                decSpace
+parserPDFInfo = do
+    char 'P' >> skipSpace
+    PDFInfo
+        <$> decimal <* skipSpace
+        <*> decimal <* skipSpace
+        <*> double <* skipSpace
+        <*> double <* skipSpace
+        <*> double <* skipSpace
+        <*> double <* skipSpace
+        <*> double <* skipSpace
+        <*> decimal <* skipSpace
+        <*> decimal <* skipSpace

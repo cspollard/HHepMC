@@ -15,43 +15,33 @@ type WeightNames = [Text]
 
 parserWeightNames :: Parser WeightNames
 parserWeightNames = do
-    n <- decSpace
+    n <- decimal <* skipSpace
     count n $ quote <* skipSpace
 
 
 type CrossSection = (Double, Double)
 
 parserCrossSection :: Parser CrossSection
-parserCrossSection = tuple doubSpace doubSpace
+parserCrossSection = do
+    char 'C' >> skipSpace
+    tuple (double <* skipSpace) (double <* skipSpace)
 
 
-data EventHeader = EventHeader {
-    eventInfo :: EventInfo,
-    weightNames :: Maybe WeightNames,
-    units :: Units,
-    crossSection :: Maybe CrossSection,
-    heavyIonInfo :: Maybe HeavyIonInfo,
-    pdfInfo :: Maybe PDFInfo
-} deriving (Eq, Ord, Read, Show)
+
+parseHeaderLine :: Parser (Char, Text)
+parseHeaderLine = (,) <$> satisfy (inClass "ENUCHF") <* skipSpace <*> (fromStrict <$> takeTill isEndOfLine)
 
 
-parserHeaderLine :: Parser (Char, Text)
-parserHeaderLine = do
-    k <- satisfy $ inClass "NUCHF"; skipSpace
-    r <- takeTill isEndOfLine <* endOfLine
-
-    return (k, fromStrict r)
-
-
+{-
 parserEventHeader :: Parser EventHeader
-parserEventHeader = do
-    ei <- parserEventInfo
-    m <- M.fromList `fmap` many parserHeaderLine
+parserEventHeader = let m = M.fromList <$> many parseHeaderLine in
+    EventHeader <$> parseEventInfo <*>
 
-    let wn = maybeResult . parse parserWeightNames =<< M.lookup 'N' m
+    let wn = parseWeightNames M.lookup 'N' m
     let u = fromJust $ maybeResult . parse parserUnits =<< M.lookup 'U' m
     let cs = maybeResult . parse parserCrossSection =<< M.lookup 'C' m
     let hii = maybeResult . parse parserHeavyIonInfo =<< M.lookup 'H' m
     let pdfi = maybeResult . parse parserPDFInfo =<< M.lookup 'F' m
 
     return $ EventHeader ei wn u cs hii pdfi
+    -}

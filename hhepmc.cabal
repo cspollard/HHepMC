@@ -21,29 +21,27 @@ executable test
 
 
 library
-    exposed-modules:     Data.HepMC.Barcoded
+    exposed-modules:      Data.HepMC.Barcoded
                         , Data.HepMC.Event
                         , Data.HepMC.EventGraph
                         , Data.HepMC.EventHeader
                         , Data.HepMC.EventInfo
                         , Data.HepMC.File
-                        , Data.HepMC.FourMomentum
                         , Data.HepMC.GenEvent
                         , Data.HepMC.HeavyIonInfo
                         , Data.HepMC.HepMCParticle
                         , Data.HepMC.HepMCVertex
                         , Data.HepMC.Parse
                         , Data.HepMC.PDFInfo
-                        , Data.HepMC.PtEtaPhiE
                         , Data.HepMC.Units
                         , Data.HepMC.Vertex
-                        , Data.HepMC.XYZT
 
     other-extensions:    OverloadedStrings
     build-depends:       base >=4.7 && < 5.0
                         , containers >=0.5
                         , text >=1.2
                         , attoparsec >=0.13
+                        , vector >= 0.11
                         , hhep >= 0.1
     hs-source-dirs:      src
     default-language:    Haskell2010

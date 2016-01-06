@@ -1,8 +1,7 @@
 module Data.HepMC.Vertex where
 
 import Data.HEP.PID
-import Data.HepMC.XYZT
-import Data.HepMC.FourMomentum
+import Data.HEP.LorentzVector
 import Data.HepMC.Barcoded
 
 
@@ -47,15 +46,8 @@ instance Eq Vertex where
 instance Ord Vertex where
     compare = liftBC2 compare
 
-instance HasFourMom Vertex where
-    fourMom = vertFourMom
-
-instance FourMomentum Vertex where
-    xV = xV . fourMom
-    yV = yV . fourMom
-    zV = zV . fourMom
-    tV = tV . fourMom
-
+instance HasLorentzVector Vertex where
+    lv = fromLV . vertFourMom
 
 type Particles = [Particle]
 
@@ -68,14 +60,8 @@ instance Eq Particle where
 instance Ord Particle where
     compare = liftBC2 compare
 
-instance HasFourMom Particle where
-    fourMom = partFourMom
-
-instance FourMomentum Particle where
-    xV = xV . fourMom
-    yV = yV . fourMom
-    zV = zV . fourMom
-    tV = tV . fourMom
+instance HasLorentzVector Particle where
+    lv = fromLV . partFourMom
 
 instance HasPID Particle where
     pid = partPID

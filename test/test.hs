@@ -22,7 +22,7 @@ main = do
 
     case r of
         Done t _ -> printAllEvents t
-        _ -> print "error"
+        _ -> error "error"
 
 
 printEvent :: Event -> IO ()

@@ -2,25 +2,28 @@ module Data.HepMC.Parse (
     module Control.Applicative,
     module Data.Functor,
     module Data.Attoparsec.Text.Lazy,
-    decSpace,
-    doubSpace,
     tuple,
-    quote
+    quote,
+    hepmcList
 ) where
 
 import Data.Attoparsec.Text.Lazy hiding (take)
 import Data.Text.Lazy (Text, pack)
-import Control.Applicative (Applicative(..), Alternative(..))
+import Control.Applicative (Applicative(..), Alternative(..), liftA2)
 import Data.Functor (Functor(..), (<$>))
-
-decSpace :: Parser Int
-decSpace = signed decimal <* skipSpace
-
-doubSpace :: Parser Double
-doubSpace = signed double <* skipSpace
+import Control.Monad (join)
+import Data.Vector
 
 tuple :: Parser a -> Parser b -> Parser (a, b)
-tuple p q = (,) <$> p <*> q
+tuple = liftA2 (,)
 
 quote :: Parser Text
 quote = pack <$> (char '"' *> manyTill anyChar (char '"'))
+
+
+-- parse a list of objects: first is the decimal length of the list
+-- followed by the objects (separated by spaces)
+hepmcList :: Parser a -> Parser (Vector a)
+hepmcList p = do
+    n <- decimal <* skipSpace
+    replicateM n (p <* skipSpace)

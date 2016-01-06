@@ -20,17 +20,19 @@ data HeavyIonInfo = HeavyIonInfo {
 
 
 parserHeavyIonInfo :: Parser HeavyIonInfo
-parserHeavyIonInfo = HeavyIonInfo <$>
-                    decSpace <*>
-                    decSpace <*>
-                    decSpace <*>
-                    decSpace <*>
-                    decSpace <*>
-                    decSpace <*>
-                    decSpace <*>
-                    decSpace <*>
-                    decSpace <*>
-                    doubSpace <*>
-                    doubSpace <*>
-                    doubSpace <*>
-                    doubSpace
+parserHeavyIonInfo = do
+    char 'H' >> skipSpace
+    HeavyIonInfo
+        <$> decimal <* skipSpace
+        <*> decimal <* skipSpace
+        <*> decimal <* skipSpace
+        <*> decimal <* skipSpace
+        <*> decimal <* skipSpace
+        <*> decimal <* skipSpace
+        <*> decimal <* skipSpace
+        <*> decimal <* skipSpace
+        <*> decimal <* skipSpace
+        <*> double <* skipSpace
+        <*> double <* skipSpace
+        <*> double <* skipSpace
+        <*> double <* skipSpace

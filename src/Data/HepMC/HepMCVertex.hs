@@ -1,9 +1,9 @@
 module Data.HepMC.HepMCVertex where
 
+import Data.HEP.LorentzVector
 import Data.HepMC.Parse
 import Data.HepMC.Barcoded
 import Data.HepMC.Vertex
-import Data.HepMC.XYZT
 
 -- temporary type that encodes all hepmc info before building event graph
 data HepMCVertex = HepMCVertex {
