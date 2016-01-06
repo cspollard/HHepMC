@@ -130,8 +130,9 @@ isChargedLepton p = p `ofType` chargedLeptons
 isNeutrino p = p `ofType` neutrinos
 isLepton p = p `ofType` leptons
 
-isHadron, isMeson, isBaryon, isDiquark :: HasPID hp => hp -> Bool
+isHadron, isMeson, isBaryon, isDiquark, isTau :: HasPID hp => hp -> Bool
 isDiquark = diquark . pid
 isHadron = hadron . pid
 isMeson = meson . pid
 isBaryon = baryon . pid
+isTau p = abspid p == tau
