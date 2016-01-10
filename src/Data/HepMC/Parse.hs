@@ -23,7 +23,10 @@ quote = pack <$> (char '"' *> manyTill anyChar (char '"'))
 
 -- parse a list of objects: first is the decimal length of the list
 -- followed by the objects (separated by spaces)
-hepmcList :: Parser a -> Parser (Vector a)
+-- hepmcList :: Parser a -> Parser (Vector a)
+hepmcList :: Parser a -> Parser [a]
 hepmcList p = do
     n <- decimal <* skipSpace
-    replicateM n (p <* skipSpace)
+    count n (p <* skipSpace)
+    -- replicateM n (p <* skipSpace)
+

@@ -6,7 +6,7 @@ import Data.HepMC.Barcoded
 
 
 data Vertex = Vertex {
-    vertBC :: BC,
+    vertBC :: Int,
     vertID :: Int,
     vertFourMom :: XYZT,
     vertNOrphan :: Int,
@@ -18,17 +18,16 @@ data Vertex = Vertex {
 } deriving (Read, Show)
 
 data Particle = Particle {
-    partBC :: BC,
+    partBC :: Int,
     partPID :: Int,
     partFourMom :: XYZT,
     partM :: Double,
     partStatus :: Int,
     partPolarizationTheta :: Double,
     partPolarizationPhi :: Double,
-    partNFlows :: Int,
     partFlows :: [(Int, Int)],
-    partParentVerts :: Vertices,
-    partChildVerts :: Vertices
+    partParentVert :: Vertex,
+    partChildVert :: Vertex
 } deriving (Read, Show)
 
 
