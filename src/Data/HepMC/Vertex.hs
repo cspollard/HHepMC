@@ -1,5 +1,7 @@
 module Data.HepMC.Vertex where
 
+import Data.Vector (Vector(..))
+
 import Data.HEP.PID
 import Data.HEP.LorentzVector
 import Data.HepMC.Barcoded
@@ -11,7 +13,6 @@ data Vertex = Vertex {
     vertFourMom :: XYZT,
     vertNOrphan :: Int,
     vertNOutgoing :: Int,
-    vertNWeights :: Int,
     vertWeights :: [Double],
     vertParentParts :: Particles,
     vertChildParts :: Particles

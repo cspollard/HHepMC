@@ -10,6 +10,8 @@ import Data.HepMC.PDFInfo
 import Data.HepMC.Units
 import Data.HepMC.HeavyIonInfo
 
+import Debug.Trace
+
 
 type WeightNames = [Text]
 
@@ -29,7 +31,7 @@ parserCrossSection = do
 
 
 parseHeaderLine :: Parser (Char, Text)
-parseHeaderLine = (,) <$> satisfy (inClass "ENUCHF") <* skipSpace <*> (fromStrict <$> takeTill isEndOfLine)
+parseHeaderLine = (,) <$> satisfy (inClass "ENUCHF") <* skipSpace <*> (fromStrict <$> takeTill isEndOfLine <* endOfLine)
 
 
 {-

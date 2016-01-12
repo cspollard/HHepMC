@@ -11,6 +11,7 @@ import Data.Text.Lazy (Text)
 import qualified Data.Text.Lazy.IO as TIO
 import System.Environment (getArgs)
 import Control.Arrow
+import Debug.Trace
 
 
 main :: IO ()
@@ -18,7 +19,7 @@ main = do
     r <- parse (skipSpace *> parserVersion) <$> TIO.getContents
 
     case r of
-        Done t _ -> printAllEvents t
+        Done t s -> print s >> printAllEvents t
         _ -> error "error"
 
 
@@ -30,6 +31,7 @@ printEvent = print . map (bc &&& pid ) . egParts . graph
 -- loop over and print all events
 printAllEvents :: Text -> IO ()
 printAllEvents t =
-    case parse parserEvent t of
-        Done r evt -> printEvent evt >> printAllEvents r
-        _ -> return ()
+    case parse (eitherP parserEvent (return ())) t of
+        Done r (Left evt) -> printEvent evt >> printAllEvents r
+        Done r (Right _) -> return ()
+        err -> print err
