@@ -45,6 +45,9 @@ library
                         , Data.HepMC.Units
                         , Data.HepMC.Vertex
 
+    ghc-options:        -O2
+                        -fprof-auto
+
     other-extensions:    OverloadedStrings
     build-depends:       base >=4.7 && < 5.0
                         , containers >=0.5
