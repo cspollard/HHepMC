@@ -18,6 +18,11 @@ cabal-version:       >=1.10
 executable hepmc-test
         main-is: test/hepmc-test.hs
         default-language:    Haskell2010
+        ghc-options:        -O2
+                            -fprof-auto
+                            -rtsopts
+                            "-with-rtsopts=-p -shepmc-test.gc -h"
+
         build-depends:       base >=4.7 && < 5.0
                             , containers >=0.5
                             , text >=1.2
@@ -34,10 +39,7 @@ library
                         , Data.HepMC.EventHeader
                         , Data.HepMC.EventInfo
                         , Data.HepMC.File
-                        -- , Data.HepMC.GenEvent
                         , Data.HepMC.HeavyIonInfo
-                        -- , Data.HepMC.HepMCParticle
-                        -- , Data.HepMC.HepMCVertex
                         , Data.HepMC.Parse
                         , Data.HepMC.PDFInfo
                         , Data.HepMC.Units

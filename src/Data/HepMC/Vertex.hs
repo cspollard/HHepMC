@@ -13,10 +13,11 @@ data Vertex = Vertex {
     vertFourMom :: XYZT,
     vertNOrphan :: Int,
     vertNOutgoing :: Int,
-    vertWeights :: [Double],
+    vertWeights :: Vector Double,
     vertParentParts :: Particles,
     vertChildParts :: Particles
 } deriving (Read, Show)
+
 
 data Particle = Particle {
     partBC :: Int,
@@ -26,7 +27,7 @@ data Particle = Particle {
     partStatus :: Int,
     partPolarizationTheta :: Double,
     partPolarizationPhi :: Double,
-    partFlows :: [(Int, Int)],
+    partFlows :: Vector (Int, Int),
     partParentVert :: Vertex,
     partChildVert :: Vertex
 } deriving (Read, Show)

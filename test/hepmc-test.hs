@@ -19,19 +19,19 @@ main = do
     r <- parse (skipSpace *> parserVersion) <$> TIO.getContents
 
     case r of
-        Done t s -> print s >> printAllEvents t
+        Done t s -> print s >> printAllEvents t 0
         _ -> error "error"
 
 
 printEvent :: Event -> IO ()
-printEvent = print . map (bc &&& pid ) . egParts . graph
+printEvent = print . map (bc &&& pid) . egParts . graph
 -- printEvent = print . map partPID . filter (\n' -> or . map (\p -> let pID = pid p in hasBottomQuark pID && hadron pID) . ancestors $ n') . egFinalParts . evtGraph
 
 
 -- loop over and print all events
-printAllEvents :: Text -> IO ()
-printAllEvents t =
-    case parse (eitherP parserEvent (return ())) t of
-        Done r (Left evt) -> printEvent evt >> printAllEvents r
-        Done r (Right _) -> return ()
-        err -> print err
+printAllEvents :: Text -> Int -> IO ()
+printAllEvents t n =
+    case parse (eitherP parserEvent $ return ()) t of
+        Done r (Left evt) -> printEvent evt >> printAllEvents r (n+1)
+        Done r (Right _) -> print $ "nevts: " ++ show n
+        err -> print "error."

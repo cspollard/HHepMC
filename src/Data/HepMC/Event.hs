@@ -23,7 +23,7 @@ data Event = Event {
     -- heavyIonInfo :: Maybe HeavyIonInfo,
     -- pdfInfo :: Maybe PDFInfo
     graph :: EventGraph
-} deriving Show
+}
 
 
 parserXYZT :: Parser XYZT
@@ -68,8 +68,8 @@ toParticle = flip (<?>) "toParticle" $ do
 
 eventGraph :: Parser EventGraph
 eventGraph = do
-    (vertFs, partFs, (vertPs, vertDs, partP, partD)) <-
-            f (IM.empty, IM.empty, (IM.empty, IM.empty, IM.empty, IM.empty))
+    (vertFs, partFs, vertPs, vertDs, partP, partD) <-
+            f (IM.empty, IM.empty, IM.empty, IM.empty, IM.empty, IM.empty)
 
     let (vs, ps) = let
             vertIM = IM.mapWithKey (\k v -> v (map (partIM IM.!) (vertPs IM.! k)) (map (partIM IM.!) (vertDs IM.! k))) vertFs
@@ -81,7 +81,7 @@ eventGraph = do
     where
         -- certainly could be improved.
         -- loop over particles...
-        f (vfs, pfs, (vps, vds, pps, pds)) = do
+        f (vfs, pfs, vps, vds, pps, pds) = do
             (vbc, tv) <- toVertex
             (pbcs, vbcs, tps) <- unzip3 <$> many toParticle
 
@@ -93,7 +93,7 @@ eventGraph = do
             let pps' = IM.union pps $ IM.fromList (zip pbcs $ repeat vbc)
             let pds' = IM.union pds $ IM.fromList (zip pbcs vbcs)
 
-            let x = (vfs', pfs', (vps', vds', pps', pds'))
+            let x = (vfs', pfs', vps', vds', pps', pds')
 
             f x <|> return x
 

@@ -13,10 +13,8 @@ data EventInfo = EventInfo {
     signalProcessBC :: Int,
     nVertices :: Int,
     beamParticleBCs :: (Int, Int),
-    rndmStateInts :: [Int],
-    eventWeights :: [Double]
-    -- rndmStateInts :: Vector Int,
-    -- eventWeights :: Vector Double
+    rndmStateInts :: Vector Int,
+    eventWeights :: Vector Double
 } deriving (Eq, Ord, Read, Show)
 
 
