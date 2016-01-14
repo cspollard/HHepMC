@@ -18,7 +18,7 @@ cabal-version:       >=1.10
 executable hepmc-test
         main-is: test/hepmc-test.hs
         default-language:    Haskell2010
-        ghc-options:        -O2
+        ghc-options:        -O
                             -fprof-auto
                             -rtsopts
                             "-with-rtsopts=-p -shepmc-test.gc -h"
@@ -45,7 +45,7 @@ library
                         , Data.HepMC.Units
                         , Data.HepMC.Vertex
 
-    ghc-options:        -O2
+    ghc-options:        -O
                         -fprof-auto
 
     other-extensions:    OverloadedStrings
