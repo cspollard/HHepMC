@@ -1,18 +1,36 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Data.HepMC.Parse (
     module Control.Applicative,
     module Data.Functor,
-    module Data.Attoparsec.Text.Lazy,
+    module Data.Attoparsec.ByteString.Char8,
     tuple,
     quote,
-    hepmcList
+    hepmcList,
+    isEndOfLine,
+    parserVersion
 ) where
 
-import Data.Attoparsec.Text.Lazy hiding (take)
+import Data.Attoparsec.ByteString.Char8 hiding (isEndOfLine)
+import Data.ByteString (ByteString)
 import Data.Text.Lazy (Text, pack)
 import Control.Applicative (Applicative(..), Alternative(..), liftA2)
 import Data.Functor (Functor(..), (<$>))
 import Control.Monad (join)
 import Data.Vector
+
+parserVersion :: Parser ByteString
+parserVersion = do
+    _ <- string "HepMC::Version"
+    skipSpace
+    v <- takeTill isEndOfLine <* endOfLine
+    _ <- string "HepMC::IO_GenEvent-START_EVENT_LISTING"
+    skipSpace
+    return v
+
+
+isEndOfLine :: Char -> Bool
+isEndOfLine w = w == '\r' || w == '\n'
 
 tuple :: Parser a -> Parser b -> Parser (a, b)
 tuple p q = (,) <$> p <* skipSpace <*> q

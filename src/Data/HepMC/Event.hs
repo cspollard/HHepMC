@@ -26,12 +26,16 @@ data Event = Event {
 }
 
 
+double' :: Parser Double
+double' = {-# SCC double' #-} double
+{-# NOINLINE double' #-}
+
 parserXYZT :: Parser XYZT
 parserXYZT = XYZT
-    <$> signed double <* skipSpace
-    <*> signed double <* skipSpace
-    <*> signed double <* skipSpace
-    <*> signed double
+    <$> double' <* skipSpace
+    <*> double' <* skipSpace
+    <*> double' <* skipSpace
+    <*> double'
 
 
 -- parse the vertex barcode and the vertex.
@@ -42,9 +46,9 @@ toVertex = flip (<?>) "toVertex" $ do
     v <- Vertex vbc
         <$> (signed decimal <* skipSpace <?> "vertID")
         <*> (parserXYZT <* skipSpace <?> "vertXYZT")
-        <*> (signed decimal <* skipSpace <?> "vert dec")
-        <*> (signed decimal <* skipSpace <?> "vert dec")
-        <*> (hepmcList (signed double) <* endOfLine <?> "vert hepmcList")
+        <*> (decimal <* skipSpace <?> "vertNOrphan")
+        <*> (decimal <* skipSpace <?> "vertNOutgoing")
+        <*> (hepmcList double' <* endOfLine <?> "vertWeights")
 
     return (vbc, v)
 
@@ -55,11 +59,12 @@ toParticle = flip (<?>) "toParticle" $ do
     pbc <- signed decimal <* skipSpace
     p <- Particle pbc
         <$> signed decimal <* skipSpace
-        <*> parserXYZT <* skipSpace
-        <*> signed double <* skipSpace
+        -- <*> parserXYZT <* skipSpace
+        <*> (XYZT <$> double' <* skipSpace <*> double' <* skipSpace <*> double' <* skipSpace <*> double' <* skipSpace)
+        <*> double' <* skipSpace
         <*> signed decimal <* skipSpace
-        <*> signed double <* skipSpace
-        <*> signed double <* skipSpace
+        <*> double' <* skipSpace
+        <*> double' <* skipSpace
 
     vbc <- signed decimal <* skipSpace
     p' <- p <$> hepmcList (tuple (signed decimal) (signed decimal)) <* endOfLine
@@ -87,7 +92,8 @@ eventGraph = do
 
             let vfs' = IM.insert vbc tv vfs
             let pfs' = IM.union pfs $ IM.fromList (zip pbcs tps)
-            -- problem here.
+            -- TODO
+            -- problem here?
             let vps' = IM.unionWith (++) vps $ IM.fromList (zip vbcs $ map (:[]) pbcs)
             let vds' = IM.insert vbc pbcs vds
             let pps' = IM.union pps $ IM.fromList (zip pbcs $ repeat vbc)

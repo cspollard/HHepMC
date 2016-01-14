@@ -1,5 +1,6 @@
 module Data.HepMC.EventHeader where
 
+import Data.ByteString
 import Data.Text.Lazy (Text, fromStrict)
 import qualified Data.Map as M
 import Data.Maybe (fromJust)
@@ -10,15 +11,11 @@ import Data.HepMC.PDFInfo
 import Data.HepMC.Units
 import Data.HepMC.HeavyIonInfo
 
-import Debug.Trace
 
+-- type WeightNames = Vector Text
 
-type WeightNames = [Text]
-
-parserWeightNames :: Parser WeightNames
-parserWeightNames = do
-    n <- decimal <* skipSpace
-    count n $ quote <* skipSpace
+-- parserWeightNames :: Parser WeightNames
+-- parserWeightNames = hepMCList
 
 
 type CrossSection = (Double, Double)
@@ -30,8 +27,8 @@ parserCrossSection = do
 
 
 
-parseHeaderLine :: Parser (Char, Text)
-parseHeaderLine = (,) <$> satisfy (inClass "ENUCHF") <* skipSpace <*> (fromStrict <$> takeTill isEndOfLine <* endOfLine)
+parseHeaderLine :: Parser (Char, ByteString)
+parseHeaderLine = (,) <$> satisfy (inClass "ENUCHF") <* skipSpace <*> (takeTill isEndOfLine <* endOfLine)
 
 
 {-

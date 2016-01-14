@@ -23,7 +23,8 @@ executable hepmc-test
                             -rtsopts
                             "-with-rtsopts=-p -shepmc-test.gc -h"
 
-        build-depends:       base >=4.7 && < 5.0
+        build-depends:        base >=4.7 && < 5.0
+                            , bytestring >= 0.10.6
                             , containers >=0.5
                             , text >=1.2
                             , attoparsec >=0.13
@@ -38,7 +39,6 @@ library
                         , Data.HepMC.EventGraph
                         , Data.HepMC.EventHeader
                         , Data.HepMC.EventInfo
-                        , Data.HepMC.File
                         , Data.HepMC.HeavyIonInfo
                         , Data.HepMC.Parse
                         , Data.HepMC.PDFInfo
@@ -49,7 +49,8 @@ library
                         -fprof-auto
 
     other-extensions:    OverloadedStrings
-    build-depends:       base >=4.7 && < 5.0
+    build-depends:        base >=4.7 && < 5.0
+                        , bytestring >= 0.10.6
                         , containers >=0.5
                         , text >=1.2
                         , attoparsec >=0.13

@@ -1,22 +1,23 @@
 module Main where
 
 import Data.HepMC.Parse
-import Data.HepMC.File hiding (events)
 import Data.HepMC.Event
 import Data.HepMC.EventGraph
 import Data.HEP.PID
 import Data.HepMC.Barcoded
 import Data.HepMC.Vertex
-import Data.Text.Lazy (Text)
-import qualified Data.Text.Lazy.IO as TIO
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as BS
 import System.Environment (getArgs)
 import Control.Arrow
 import Debug.Trace
 
 
+
+
 main :: IO ()
 main = do
-    r <- parse (skipSpace *> parserVersion) <$> TIO.getContents
+    r <- parse (skipSpace *> parserVersion) <$> BS.getContents
 
     case r of
         Done t s -> print s >> printAllEvents t 0
@@ -29,7 +30,7 @@ printEvent = print . map (bc &&& pid) . egParts . graph
 
 
 -- loop over and print all events
-printAllEvents :: Text -> Int -> IO ()
+printAllEvents :: ByteString -> Int -> IO ()
 printAllEvents t n =
     case parse (eitherP parserEvent $ return ()) t of
         Done r (Left evt) -> printEvent evt >> printAllEvents r (n+1)
