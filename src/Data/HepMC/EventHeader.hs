@@ -28,7 +28,7 @@ parserCrossSection = do
 
 
 parseHeaderLine :: Parser (Char, ByteString)
-parseHeaderLine = (,) <$> satisfy (inClass "ENUCHF") <* skipSpace <*> (takeTill isEndOfLine <* endOfLine)
+parseHeaderLine = (,) <$> satisfy (inClass "ENUCHF") <* char ' ' <*> (takeTill isEndOfLine <* endOfLine)
 
 
 {-

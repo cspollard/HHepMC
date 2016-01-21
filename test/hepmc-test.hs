@@ -35,4 +35,5 @@ printAllEvents t n =
     case parse (eitherP parserEvent $ return ()) t of
         Done r (Left evt) -> printEvent evt >> printAllEvents r (n+1)
         Done r (Right _) -> print $ "nevts: " ++ show n
-        err -> print "error."
+        Fail bs conts err -> print conts >> print err
+        Partial _ -> print "didn't finish???"
