@@ -25,7 +25,7 @@ main = do
 
 
 printEvent :: Event -> IO ()
-printEvent = print . map (bc &&& pid) . egParts . graph
+printEvent = print . length . filter final . egParts . graph
 -- printEvent = print . map partPID . filter (\n' -> or . map (\p -> let pID = pid p in hasBottomQuark pID && hadron pID) . ancestors $ n') . egFinalParts . evtGraph
 
 

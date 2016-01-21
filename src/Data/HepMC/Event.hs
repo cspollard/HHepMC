@@ -53,12 +53,13 @@ toVertex = flip (<?>) "toVertex" $ do
     return (vbc, v)
 
 
-toParticle :: Parser (Int, Int, Vertex -> Vertex -> Particle)
+toParticle :: Parser (Int, Int, Vertex -> Maybe Vertex -> Particle)
 toParticle = flip (<?>) "toParticle" $ do
     char 'P' >> skipSpace
     pbc <- signed decimal <* skipSpace
     p <- Particle pbc
         <$> signed decimal <* skipSpace
+        -- TODO
         -- <*> parserXYZT <* skipSpace
         <*> (XYZT <$> double' <* skipSpace <*> double' <* skipSpace <*> double' <* skipSpace <*> double' <* skipSpace)
         <*> double' <* skipSpace
@@ -77,15 +78,17 @@ eventGraph = do
             f (IM.empty, IM.empty, IM.empty, IM.empty, IM.empty, IM.empty)
 
     let (vs, ps) = let
+            maybeInt x = if x == 0 then Nothing else Just x
             vertIM = IM.mapWithKey (\k v -> v (map (partIM IM.!) (vertPs IM.! k)) (map (partIM IM.!) (vertDs IM.! k))) vertFs
-            partIM = IM.mapWithKey (\k p -> p (vertIM IM.! (partP IM.! k)) (vertIM IM.! (partD IM.! k))) partFs
+            partIM = IM.mapWithKey (\k p -> p (vertIM IM.! (partP IM.! k)) (fmap (vertIM IM.!) $ maybeInt (partD IM.! k))) partFs
             in (vertIM, partIM)
 
     return $ EventGraph (IM.elems vs) (IM.elems ps) vs ps
 
     where
+        -- TODO
         -- certainly could be improved.
-        -- loop over particles...
+        -- loop over particles instead of unzip3
         f (vfs, pfs, vps, vds, pps, pds) = do
             (vbc, tv) <- toVertex
             (pbcs, vbcs, tps) <- unzip3 <$> many toParticle

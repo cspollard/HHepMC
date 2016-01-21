@@ -29,7 +29,7 @@ data Particle = Particle {
     partPolarizationPhi :: Double,
     partFlows :: Vector (Int, Int),
     partParentVert :: Vertex,
-    partChildVert :: Vertex
+    partChildVert :: Maybe Vertex
 } deriving (Read, Show)
 
 

@@ -9,6 +9,7 @@ import Data.HepMC.Barcoded
 import qualified Data.HEP.PID as PID
 import Data.HEP.PID (HasPID(..))
 import Data.Either (partitionEithers)
+import Data.Maybe (isNothing, maybeToList)
 
 
 -- do we need an IntMap of these guys?
@@ -20,13 +21,15 @@ data EventGraph = EventGraph {
 }
 
 
--- egFinalParts :: EventGraph -> Particles
--- egFinalParts = filter (null . partChildVert) . egParts
+final :: Particle -> Bool
+final = isNothing . partChildVert
 
 parents, children, descendants, ancestors :: Particle -> Particles
 
 parents = vertParentParts . partParentVert
-children = vertChildParts . partChildVert
+children p = case partChildVert p of
+                Nothing -> []
+                Just v -> vertChildParts v
 
 descendants n = S.toList $ descendants' S.empty n
     where
