@@ -24,6 +24,11 @@ data EventGraph = EventGraph {
 final :: Particle -> Bool
 final = isNothing . partChildVert
 
+-- TODO
+-- this needs to be looked into.
+prompt :: Particle -> Bool
+prompt p = null . filter (\p' -> partStatus p' == 2 && (PID.isHadron p' || PID.isTau p')) . ancestors $ p
+
 parents, children, descendants, ancestors :: Particle -> Particles
 
 parents = vertParentParts . partParentVert
@@ -46,7 +51,3 @@ ancestors n = S.toList $ foldl ancestors' S.empty (parents n)
                             else foldl ancestors' (n' `S.insert` s) (parents n')
 
 
--- TODO
--- this needs to be looked into.
--- isPrompt :: Particle -> Bool
--- isPrompt p = null . filter (\p' -> partStatus p' == 2 && (PID.isHadron p' || PID.isTau p')) . ancestors $ p

@@ -59,9 +59,7 @@ toParticle = flip (<?>) "toParticle" $ do
     pbc <- signed decimal <* skipSpace
     p <- Particle pbc
         <$> signed decimal <* skipSpace
-        -- TODO
-        -- <*> parserXYZT <* skipSpace
-        <*> (XYZT <$> double' <* skipSpace <*> double' <* skipSpace <*> double' <* skipSpace <*> double' <* skipSpace)
+        <*> parserXYZT <* skipSpace
         <*> double' <* skipSpace
         <*> signed decimal <* skipSpace
         <*> double' <* skipSpace
