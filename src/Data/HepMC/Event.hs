@@ -26,16 +26,12 @@ data Event = Event {
 }
 
 
-double' :: Parser Double
-double' = {-# SCC double' #-} double
-{-# NOINLINE double' #-}
-
 parserXYZT :: Parser XYZT
 parserXYZT = XYZT
-    <$> double' <* skipSpace
-    <*> double' <* skipSpace
-    <*> double' <* skipSpace
-    <*> double'
+    <$> double <* skipSpace
+    <*> double <* skipSpace
+    <*> double <* skipSpace
+    <*> double
 
 
 -- parse the vertex barcode and the vertex.
@@ -48,7 +44,7 @@ toVertex = flip (<?>) "toVertex" $ do
         <*> (parserXYZT <* skipSpace <?> "vertXYZT")
         <*> (decimal <* skipSpace <?> "vertNOrphan")
         <*> (decimal <* skipSpace <?> "vertNOutgoing")
-        <*> (hepmcList double' <* endOfLine <?> "vertWeights")
+        <*> (hepmcList double <* endOfLine <?> "vertWeights")
 
     return (vbc, v)
 
@@ -60,10 +56,10 @@ toParticle = flip (<?>) "toParticle" $ do
     p <- Particle pbc
         <$> signed decimal <* skipSpace
         <*> parserXYZT <* skipSpace
-        <*> double' <* skipSpace
+        <*> double <* skipSpace
         <*> signed decimal <* skipSpace
-        <*> double' <* skipSpace
-        <*> double' <* skipSpace
+        <*> double <* skipSpace
+        <*> double <* skipSpace
 
     vbc <- signed decimal <* skipSpace
     p' <- p <$> hepmcList (tuple (signed decimal) (signed decimal)) <* endOfLine
