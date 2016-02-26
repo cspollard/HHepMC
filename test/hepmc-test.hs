@@ -8,6 +8,7 @@ import Data.HepMC.Barcoded
 import Data.HepMC.Vertex
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as BS
+import qualified Data.Set as S
 import System.Environment (getArgs)
 import Control.Arrow
 import Debug.Trace
@@ -25,7 +26,7 @@ main = do
 
 
 printEvent :: Event -> IO ()
-printEvent = print . length . filter (isPID 2212) . filter final . egParts . graph
+printEvent = print . length . S.filter (isPID 2212) . S.filter final . egParts . graph
 -- printEvent = print . map partPID . filter (\n' -> or . map (\p -> let pID = pid p in hasBottomQuark pID && hadron pID) . ancestors $ n') . egFinalParts . evtGraph
 
 

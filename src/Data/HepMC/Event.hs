@@ -3,7 +3,8 @@ module Data.HepMC.Event where
 import Data.Either (partitionEithers)
 import Data.IntMap (IntMap)
 import qualified Data.IntMap as IM
-import Control.Monad.Fix (MonadFix(..))
+import Data.Set (Set)
+import qualified Data.Set as S
 
 import Data.HEP.LorentzVector
 
@@ -12,8 +13,6 @@ import Data.HepMC.Barcoded
 import Data.HepMC.Vertex
 import Data.HepMC.EventHeader
 import Data.HepMC.EventGraph
-
-import Debug.Trace
 
 data Event = Event {
     -- eventInfo :: EventInfo,
@@ -73,11 +72,11 @@ eventGraph = do
 
     let (vs, ps) = let
             maybeInt x = if x == 0 then Nothing else Just x
-            vertIM = IM.mapWithKey (\k v -> v (map (partIM IM.!) (vertPs IM.! k)) (map (partIM IM.!) (vertDs IM.! k))) vertFs
+            vertIM = IM.mapWithKey (\k v -> v (S.fromList . map (partIM IM.!) $ (vertPs IM.! k)) (S.fromList . map (partIM IM.!) $ (vertDs IM.! k))) vertFs
             partIM = IM.mapWithKey (\k p -> p (vertIM IM.! (partP IM.! k)) (fmap (vertIM IM.!) $ maybeInt (partD IM.! k))) partFs
             in (vertIM, partIM)
 
-    return $ EventGraph (IM.elems vs) (IM.elems ps) vs ps
+    return $ EventGraph (S.fromList $ IM.elems vs) (S.fromList $ IM.elems ps) vs ps
 
     where
         -- TODO

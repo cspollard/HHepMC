@@ -2,6 +2,8 @@ module Data.HepMC.Vertex where
 
 import Data.Vector (Vector(..))
 
+import Data.Set (Set(..))
+
 import Data.HEP.PID
 import Data.HEP.LorentzVector
 import Data.HepMC.Barcoded
@@ -33,7 +35,7 @@ data Particle = Particle {
 } deriving (Read, Show)
 
 
-type Vertices = [Vertex]
+type Vertices = Set Vertex
 
 class HasVertices hv where
     vertices :: hv -> Vertices
@@ -50,7 +52,7 @@ instance Ord Vertex where
 instance HasLorentzVector Vertex where
     lv = fromLV . vertFourMom
 
-type Particles = [Particle]
+type Particles = Set Particle
 
 instance Barcoded Particle where
     bc = partBC

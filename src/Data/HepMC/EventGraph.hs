@@ -27,23 +27,23 @@ final = isNothing . partChildVert
 -- TODO
 -- this needs to be looked into.
 prompt :: Particle -> Bool
-prompt p = null . filter (\p' -> partStatus p' == 2 && (PID.isHadron p' || PID.isTau p')) . ancestors $ p
+prompt p = null . S.filter (\p' -> partStatus p' == 2 && (PID.isHadron p' || PID.isTau p')) . ancestors $ p
 
 parents, children, descendants, ancestors :: Particle -> Particles
 
 parents = vertParentParts . partParentVert
 children p = case partChildVert p of
-                Nothing -> []
+                Nothing -> S.empty
                 Just v -> vertChildParts v
 
-descendants n = S.toList $ descendants' S.empty n
+descendants n = descendants' S.empty n
     where
         -- ignore nodes that are already in the set---avoid loops.
         descendants' s n' = if n' `S.member` s
                             then s
                             else foldl descendants' (n' `S.insert` s) (children n')
 
-ancestors n = S.toList $ foldl ancestors' S.empty (parents n)
+ancestors n = foldl ancestors' S.empty (parents n)
     where
         -- ignore nodes that are already in the set---avoid loops.
         ancestors' s n' = if n' `S.member` s
