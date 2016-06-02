@@ -2,14 +2,8 @@ flags: {}
 extra-package-dbs: []
 packages:
 - '.'
-- ../hhep.git
+- ../hhep.git/
 extra-deps:
-- attoparsec-0.13.0.1
-- data-ordlist-0.4.7.0
-- hashable-1.2.3.3
-- mtl-2.2.1
-- primitive-0.6.1.0
-- scientific-0.3.4.4
-- text-1.2.2.0
-- vector-0.11.0.0
-resolver: ghc-7.10.3
+- diagrams-pgf-0.1.0.3
+- texrunner-0.0.1.0
+resolver: lts-5.15
