@@ -1,7 +1,15 @@
 module Main where
 
+import Control.Lens
+import Data.Monoid ((<>))
+import qualified Data.Set as S
+
 import Conduit
+import qualified Data.Conduit.List as CL
 import Data.Conduit.Attoparsec
+
+import Data.HEP.LorentzVector
+import Data.HEP.PID
 
 import Data.HepMC.Parse
 import Data.HepMC.Event
@@ -17,9 +25,14 @@ main = do
             sourceFile f
             =$= (sinkParser parserVersion
                     >> conduitParser parserEvent)
-            $$  mapM_C (liftIO . print)
+            =$= mapC snd =$= mapC findZll
+            =$= CL.catMaybes
+            $$  mapM_C (liftIO . (\x -> print (x, view lvM x)))
 
 
--- printEvent :: Event -> IO ()
--- printEvent = print . length . S.filter ((&&) <$> hasPID 2212 <*> final) . view egParts . graph
--- printEvent = print . map partPID . filter (\n' -> or . map (\p -> let pID = pid p in hasBottomQuark pID && hadron pID) . ancestors $ n') . egFinalParts . evtGraph
+findZll :: Event -> Maybe PtEtaPhiE
+findZll e = case e ^.. particles . to S.toList . traverse . filtered promptLepton . toPtEtaPhiE of
+                [l1, l2] -> Just $ l1 <> l2
+                _        -> Nothing
+
+    where promptLepton = (&&) <$> isChargedLepton <*> prompt

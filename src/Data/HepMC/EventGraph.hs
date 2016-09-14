@@ -22,6 +22,11 @@ data EventGraph =
 
 makeLenses ''EventGraph
 
+instance HasVertices EventGraph where
+    vertices = egVerts
+
+instance HasParticles EventGraph where
+    particles = egParts
 
 final :: Particle -> Bool
 final = null . view partChildVert

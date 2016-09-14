@@ -77,4 +77,4 @@ instance HasPID Particle where
     pid = partPID
 
 class HasParticles hp where
-    particles :: hp -> Particles
+    particles :: Lens' hp Particles

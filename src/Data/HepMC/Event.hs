@@ -1,19 +1,27 @@
-module Data.HepMC.Event where
+{-# LANGUAGE TemplateHaskell #-}
+
+module Data.HepMC.Event
+    ( module X
+    , Event(..)
+    , graph
+    , parserEvent
+    ) where
+
+import Control.Lens
 
 import qualified Data.IntMap as IM
 
 import qualified Data.Set as S
 
-import Data.HEP.LorentzVector
-
+import Data.HEP.LorentzVector as X
 import Data.HepMC.Parse
-import Data.HepMC.Vertex
-import Data.HepMC.EventHeader
-import Data.HepMC.EventGraph
+import Data.HepMC.Vertex as X
+import Data.HepMC.EventHeader as X
+import Data.HepMC.EventGraph as X
 
 data Event =
     Event
-    { graph :: EventGraph
+    { _graph :: EventGraph
     -- eventInfo :: EventInfo,
     -- weightNames :: Maybe [Text],
     -- units :: Units,
@@ -22,6 +30,14 @@ data Event =
     -- pdfInfo :: Maybe PDFInfo
     } deriving Show
 
+
+makeLenses ''Event
+
+instance HasVertices Event where
+    vertices = graph . vertices
+
+instance HasParticles Event where
+    particles = graph . particles
 
 parserXYZT :: Parser XYZT
 parserXYZT = XYZT
