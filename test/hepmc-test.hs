@@ -1,11 +1,9 @@
 module Main where
 
 import Control.Lens
-import Data.Monoid ((<>))
 import qualified Data.Set as S
 
 import Conduit
-import qualified Data.Conduit.List as CL
 import Data.Conduit.Attoparsec
 
 import Data.HEP.LorentzVector
@@ -25,14 +23,16 @@ main = do
             sourceFile f
             =$= (sinkParser parserVersion
                     >> conduitParser parserEvent)
-            =$= mapC snd =$= mapC findZll
-            =$= CL.catMaybes
-            $$  mapM_C (liftIO . (\x -> print (x, view lvM x)))
+            =$= mapC snd
+            $$  mapM_C (liftIO . findZll)
 
 
-findZll :: Event -> Maybe PtEtaPhiE
-findZll e = case e ^.. particles . to S.toList . traverse . filtered promptLepton . toPtEtaPhiE of
-                [l1, l2] -> Just $ l1 <> l2
-                _        -> Nothing
+findZll :: Event -> IO ()
+findZll e = case e ^.. particles . to S.toList . traverse . filtered promptLepton of
+                ls@[_, _] -> do
+                        traverseOf_ (traverse . pid) print ls
+                        views lvM print (foldOf (traverse . toPtEtaPhiE) ls)
+
+                _           -> return ()
 
     where promptLepton = (&&) <$> isChargedLepton <*> prompt
