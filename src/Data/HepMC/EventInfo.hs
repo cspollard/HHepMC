@@ -1,21 +1,28 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 module Data.HepMC.EventInfo where
+
+import Control.Lens
 
 import Data.HepMC.Parse
 import Data.Vector
 
-data EventInfo = EventInfo {
-    eventNumber :: Int,
-    nMultPartInts :: Int,
-    eventScale :: Double,
-    alphaQCD :: Double,
-    alphaQED :: Double,
-    signalProcessID :: Int,
-    signalProcessBC :: Int,
-    nVertices :: Int,
-    beamParticleBCs :: (Int, Int),
-    rndmStateInts :: Vector Int,
-    eventWeights :: Vector Double
-} deriving (Eq, Ord, Read, Show)
+data EventInfo =
+    EventInfo
+        { _eventNumber :: Int
+        , _nMultPartInts :: Int
+        , _eventScale :: Double
+        , _alphaQCD :: Double
+        , _alphaQED :: Double
+        , _signalProcessID :: Int
+        , _signalProcessBC :: Int
+        , _nVertices :: Int
+        , _beamParticleBCs :: (Int, Int)
+        , _rndmStateInts :: Vector Int
+        , _eventWeights :: Vector Double
+        } deriving (Eq, Ord, Show)
+
+makeLenses ''EventInfo
 
 
 parserEventInfo :: Parser EventInfo

@@ -1,26 +1,21 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Data.HepMC.Parse (
-    module Control.Applicative,
-    module Data.Functor,
-    module Data.Attoparsec.ByteString.Char8,
-    tuple,
-    quote,
-    hepmcList,
-    isEndOfLine,
-    parserVersion
+module Data.HepMC.Parse
+    ( module X
+    , tuple, quote
+    , hepmcList, isEndOfLine
+    , parserVersion
 ) where
 
-import Data.Attoparsec.ByteString.Char8 hiding (isEndOfLine)
+import Control.Applicative as X (Alternative(..))
+import Data.Attoparsec.ByteString.Char8 as X hiding (isEndOfLine)
 import Data.ByteString (ByteString)
 import Data.Text.Lazy (Text, pack)
-import Control.Applicative (Applicative(..), Alternative(..), liftA2)
-import Data.Functor (Functor(..), (<$>))
-import Control.Monad (join)
 import Data.Vector
 
 parserVersion :: Parser ByteString
 parserVersion = do
+    skipSpace
     _ <- string "HepMC::Version"
     skipSpace
     v <- takeTill isEndOfLine <* endOfLine

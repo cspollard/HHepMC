@@ -1,22 +1,29 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 module Data.HepMC.HeavyIonInfo where
+
+import Control.Lens
 
 import Data.HepMC.Parse
 
-data HeavyIonInfo = HeavyIonInfo {
-    nHardScatters :: Int,
-    nProjParts :: Int,
-    nTargParts :: Int,
-    nNNInts :: Int,
-    nSpectNeuts :: Int,
-    nSpectProts :: Int,
-    nNNwoundColls :: Int,
-    nNwoundNColls :: Int,
-    nNwoundNwoundColls :: Int,
-    collImpactParam :: Double,
-    eventPlaneAzimuth :: Double,
-    nucleonEccent :: Double,
-    inelastCrossSec :: Double
-} deriving (Eq, Ord, Read, Show)
+data HeavyIonInfo =
+    HeavyIonInfo
+        { _nHardScatters :: Int
+        , _nProjParts :: Int
+        , _nTargParts :: Int
+        , _nNNInts :: Int
+        , _nSpectNeuts :: Int
+        , _nSpectProts :: Int
+        , _nNNwoundColls :: Int
+        , _nNwoundNColls :: Int
+        , _nNwoundNwoundColls :: Int
+        , _collImpactParam :: Double
+        , _eventPlaneAzimuth :: Double
+        , _nucleonEccent :: Double
+        , _inelastCrossSec :: Double
+        } deriving Show
+
+makeLenses ''HeavyIonInfo
 
 
 parserHeavyIonInfo :: Parser HeavyIonInfo

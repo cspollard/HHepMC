@@ -4,6 +4,4 @@ packages:
 - '.'
 - ../hhep.git/
 extra-deps:
-- diagrams-pgf-0.1.0.3
-- texrunner-0.0.1.0
-resolver: lts-5.15
+resolver: lts-6.10

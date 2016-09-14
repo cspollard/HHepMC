@@ -1,40 +1,42 @@
+{-# LANGUAGE TemplateHaskell #-}
+
+
 module Data.HepMC.EventGraph where
 
-import Data.HepMC.Parse
+import Control.Lens hiding (children)
+
 import qualified Data.Set as S
 import Data.IntMap (IntMap)
-import qualified Data.IntMap as IM
 import Data.HepMC.Vertex
-import Data.HepMC.Barcoded
 import qualified Data.HEP.PID as PID
-import Data.HEP.PID (HasPID(..))
-import Data.Either (partitionEithers)
-import Data.Maybe (isNothing, maybeToList)
 
 
 -- do we need an IntMap of these guys?
-data EventGraph = EventGraph {
-    egVerts :: Vertices,
-    egParts :: Particles,
-    egVertsMap :: IntMap Vertex,
-    egPartsMap :: IntMap Particle
-}
+data EventGraph =
+    EventGraph
+        { _egVerts :: Vertices
+        , _egParts :: Particles
+        , _egVertsMap :: IntMap Vertex
+        , _egPartsMap :: IntMap Particle
+        } deriving Show
+
+makeLenses ''EventGraph
 
 
 final :: Particle -> Bool
-final = isNothing . partChildVert
+final = null . view partChildVert
 
 -- TODO
 -- this needs to be looked into.
 prompt :: Particle -> Bool
-prompt = null . S.filter (\p' -> partStatus p' == 2 && (PID.isHadron p' || PID.isTau p')) . ancestors
+prompt = null . S.filter (\p' -> view partStatus p' == 2 && (PID.isHadron p' || PID.isTau p')) . ancestors
 
 parents, children, descendants, ancestors :: Particle -> Particles
 
-parents = vertParentParts . partParentVert
-children p = case partChildVert p of
+parents = view vertParentParts . view partParentVert
+children p = case view partChildVert p of
                 Nothing -> S.empty
-                Just v -> vertChildParts v
+                Just v -> view vertChildParts v
 
 descendants = descendants' S.empty
     where
@@ -49,5 +51,3 @@ ancestors n = foldl ancestors' S.empty (parents n)
         ancestors' s n' = if n' `S.member` s
                             then s
                             else foldl ancestors' (n' `S.insert` s) (parents n')
-
-

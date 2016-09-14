@@ -1,28 +1,26 @@
 module Data.HepMC.Event where
 
-import Data.Either (partitionEithers)
-import Data.IntMap (IntMap)
 import qualified Data.IntMap as IM
-import Data.Set (Set)
+
 import qualified Data.Set as S
 
 import Data.HEP.LorentzVector
 
 import Data.HepMC.Parse
-import Data.HepMC.Barcoded
 import Data.HepMC.Vertex
 import Data.HepMC.EventHeader
 import Data.HepMC.EventGraph
 
-data Event = Event {
+data Event =
+    Event
+    { graph :: EventGraph
     -- eventInfo :: EventInfo,
     -- weightNames :: Maybe [Text],
     -- units :: Units,
     -- crossSection :: Maybe CrossSection,
     -- heavyIonInfo :: Maybe HeavyIonInfo,
     -- pdfInfo :: Maybe PDFInfo
-    graph :: EventGraph
-}
+    } deriving Show
 
 
 parserXYZT :: Parser XYZT
@@ -73,7 +71,7 @@ eventGraph = do
     let (vs, ps) = let
             maybeInt x = if x == 0 then Nothing else Just x
             vertIM = IM.mapWithKey (\k v -> v (S.fromList . map (partIM IM.!) $ (vertPs IM.! k)) (S.fromList . map (partIM IM.!) $ (vertDs IM.! k))) vertFs
-            partIM = IM.mapWithKey (\k p -> p (vertIM IM.! (partP IM.! k)) (fmap (vertIM IM.!) $ maybeInt (partD IM.! k))) partFs
+            partIM = IM.mapWithKey (\k p -> p (vertIM IM.! (partP IM.! k)) ((vertIM IM.!) <$> maybeInt (partD IM.! k))) partFs
             in (vertIM, partIM)
 
     return $ EventGraph (S.fromList $ IM.elems vs) (S.fromList $ IM.elems ps) vs ps
@@ -102,5 +100,5 @@ eventGraph = do
 
 parserEvent :: Parser Event
 parserEvent = do
-    r <- many parseHeaderLine
+    _ <- many parseHeaderLine
     Event <$> eventGraph
