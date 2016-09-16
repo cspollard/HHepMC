@@ -1,7 +1,6 @@
 module Main where
 
 import Control.Lens
-import qualified Data.Set as S
 
 import Conduit
 import Data.Conduit.Attoparsec
@@ -11,6 +10,7 @@ import Data.HEP.PID
 
 import Data.HepMC.Parse
 import Data.HepMC.Event
+import Data.HepMC.EventGraph
 import System.Environment (getArgs)
 
 
@@ -24,20 +24,17 @@ main = do
             =$= (sinkParser parserVersion
                     >> conduitParser parserEvent)
 
-            $$ mapM_C (liftIO . print)
-
-            {-
             =$= mapC snd
             $$  mapM_C (liftIO . findZll)
+            -- $$  mapM_C (liftIO . print . toListOf (particles . filtered final))
 
 
 findZll :: Event -> IO ()
-findZll e = case e ^.. particles . to S.toList . traverse . filtered promptLepton of
+findZll e = case e ^.. particles . filtered promptLepton of
                 ls@[_, _] -> do
                         traverseOf_ (traverse . pid) print ls
-                        views lvM print (foldOf (traverse . toPtEtaPhiE) ls)
+                        views lvM print (foldOf (traverse . toXYZT) ls)
 
-                _           -> return ()
+                xs -> print xs
 
-    where promptLepton = (&&) <$> isChargedLepton <*> prompt
-    -}
+    where promptLepton = and . sequenceA [isChargedLepton, prompt, final, (> 25) . view lvPt]

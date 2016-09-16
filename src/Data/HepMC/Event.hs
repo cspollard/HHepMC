@@ -4,32 +4,60 @@
 module Data.HepMC.Event
     ( module X
     , Event(..)
-    , eobjs
+    , eparts, everts, graph, graph'
     , parserEvent
+    , Vertex(..), vparents, vchildren
+    , vertID, vertNOrphan
+    , vertNOutgoing, vertWeights
+    , vevent
+    , Particle(..), pparents, pchildren
+    , partM, partStatus
+    , partPolarizationTheta, partPolarizationPhi
+    , partFlows, pevent
     ) where
 
 import Control.Lens
 
+import Data.Array
 import qualified Data.Graph as G
 import qualified Data.IntMap as IM
 
 import Data.HepMC.Internal
 
+import Data.HepMC.Barcoded
 import Data.HEP.LorentzVector as X
+import Data.HEP.PID
 import Data.HepMC.Parse
-import Data.HepMC.Vertex as X
 import Data.HepMC.EventHeader as X
 
+data Vertex =
+    Vertex
+        { _vparents :: [Particle]
+        , _vchildren :: [Particle]
+        , _vevent :: Event
+        , _rvert :: RawVertex
+        }
 
-data GraphObj = V Vertex
-              | P Particle
-              deriving Show
+data Particle =
+    Particle
+        { _pparents :: [Vertex]
+        , _pchildren :: [Vertex]
+        , _pevent :: Event
+        , _rpart :: RawParticle
+        }
 
-makePrisms ''GraphObj
+instance Show Vertex where
+    show = show . _rvert
+
+instance Show Particle where
+    show = show . _rpart
 
 data Event =
     Event
-        { _eobjs :: IM.IntMap GraphObj
+        { _eparts :: IM.IntMap Particle
+        , _everts :: IM.IntMap Vertex
+        , _graph :: G.Graph
+        , _graph' :: G.Graph
         -- eventInfo :: EventInfo,
         -- weightNames :: Maybe [Text],
         -- units :: Units,
@@ -39,7 +67,66 @@ data Event =
         } deriving Show
 
 
+makeLenses ''Vertex
+makeLenses ''Particle
 makeLenses ''Event
+
+vertID :: Lens' Vertex Int
+vertID = rvert . rvertID
+
+vertNOrphan :: Lens' Vertex Int
+vertNOrphan = rvert . rvertNOrphan
+
+vertNOutgoing :: Lens' Vertex Int
+vertNOutgoing = rvert . rvertNOutgoing
+
+vertWeights :: Lens' Vertex [Double]
+vertWeights = rvert . rvertWeights
+
+
+partM :: Lens' Particle Double
+partM = rpart . rpartM
+
+partStatus :: Lens' Particle Int
+partStatus = rpart . rpartStatus
+
+partPolarizationTheta :: Lens' Particle Double
+partPolarizationTheta = rpart . rpartPolarizationTheta
+
+partPolarizationPhi :: Lens' Particle Double
+partPolarizationPhi = rpart . rpartPolarizationPhi
+
+partFlows :: Lens' Particle [(Int, Int)]
+partFlows = rpart . rpartFlows
+
+
+instance Barcoded Vertex where
+    bc = rvert . rvertBC
+
+instance Eq Vertex where
+    (==) = liftBC2 (==)
+
+instance Ord Vertex where
+    compare = liftBC2 compare
+
+instance HasLorentzVector Vertex where
+    toXYZT = rvert . rvertXYZT
+
+instance Barcoded Particle where
+    bc = rpart . rpartBC
+
+instance Eq Particle where
+    (==) = liftBC2 (==)
+
+instance Ord Particle where
+    compare = liftBC2 compare
+
+instance HasLorentzVector Particle where
+    toXYZT = rpart . rpartXYZT
+
+instance HasPID Particle where
+    pid = rpart . rpartPID
+
 
 parserXYZT :: Parser XYZT
 parserXYZT = XYZT
@@ -78,7 +165,7 @@ parseRawParticle = flip (<?>) "parseRawParticle" $ do
 
     vbc <- signed decimal <* skipSpace
     p' <- p <$> hepmcList (tuple (signed decimal) (signed decimal)) <* endOfLine
-    return ((pbc, p'), [(pbc, vbc)]) 
+    return ((pbc, p'), if vbc == 0 then [] else [(pbc, vbc)]) 
 
 
 
@@ -92,12 +179,17 @@ parserEvent = do
             return (v, ps, ves++concat pes)
 
     let ps = concat pps
+    let pmap = IM.fromList ps
+    let vmap = IM.fromList vs
+
     let is = fmap fst vs ++ fmap fst ps
     let mx = maximum is
     let mn = minimum is
     let g = G.buildG (mn, mx) $ concat ees
     let g' = G.transposeG g
-    let gos = (fmap.fmap) (V . Vertex g g') vs
-                ++ (fmap.fmap) (P . Particle g g') ps
 
-    return $ Event (IM.fromList gos)
+    let partMap = IM.mapWithKey (\i -> Particle ((vertMap IM.!) <$> (g' ! i)) ((vertMap IM.!) <$> (g ! i)) evt) pmap
+        vertMap = IM.mapWithKey (\i -> Vertex ((partMap IM.!) <$> (g' ! i)) ((partMap IM.!) <$> (g ! i)) evt) vmap
+        evt = Event partMap vertMap g g' 
+
+    return evt

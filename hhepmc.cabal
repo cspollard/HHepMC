@@ -27,7 +27,6 @@ library
                     , Data.HepMC.Parse
                     , Data.HepMC.PDFInfo
                     , Data.HepMC.Units
-                    , Data.HepMC.Vertex
   other-modules:      Data.HepMC.Internal
 
   ghc-options:         -Wall -O1

@@ -2,20 +2,25 @@ module Data.HepMC.EventGraph where
 
 import Control.Lens hiding (children)
 
-import Data.Array
+import Data.Maybe (mapMaybe)
 
-import Data.IntMap (IntMap)
-import Data.HepMC.Vertex
-
-import Data.HepMC.Barcoded
+import qualified Data.Graph as G
+import qualified Data.IntMap as IM
 
 import qualified Data.HEP.PID as PID
+import Data.HepMC.Barcoded
+import Data.HepMC.Event
 
 
 
 final :: Particle -> Bool
-final p = null (view pgraph p ! view bc p)
+final = null . view pchildren
 
+particles :: Traversal' Event Particle
+particles = eparts . traverse
+
+vertices :: Traversal' Event Vertex
+vertices = everts . traverse
 
 -- TODO
 -- this needs to be looked into.
@@ -23,25 +28,27 @@ prompt :: Particle -> Bool
 prompt = null . view (filtered unstable . ancestors)
     where unstable p = view partStatus p == 2 && (PID.isHadron p || PID.isTau p)
 
-parents, children, descendants, ancestors :: Traversal' Particle Particle
+-- NB:
+-- traversals don't seem safe in self-referential structures...
+parents, children, descendants, ancestors :: Monoid r => Getting r Particle [Particle]
 
-parents p = view pgraph' p ! view bc p
+parents = pparents . traverse . vparents
+children = pchildren . traverse . vchildren
 
-view vertParentParts . view partParentVert
-children p = case view partChildVert p of
-                Nothing -> S.empty
-                Just v -> view vertChildParts v
+descendants = to $
+    -- TODO
+    -- this is inherently inefficient because it looks up vertices
+    -- unnecessarily
+    \p -> let g = view (pevent . graph) p
+              im = view (pevent . eparts) p
+              i = view bc p
+          in  mapMaybe (`IM.lookup` im) (G.reachable g i)
 
-descendants = descendants' S.empty
-    where
-        -- ignore nodes that are already in the set---avoid loops.
-        descendants' s n' = if n' `S.member` s
-                            then s
-                            else foldl descendants' (n' `S.insert` s) (children n')
-
-ancestors n = foldl ancestors' S.empty (parents n)
-    where
-        -- ignore nodes that are already in the set---avoid loops.
-        ancestors' s n' = if n' `S.member` s
-                            then s
-                            else foldl ancestors' (n' `S.insert` s) (parents n')
+ancestors = to $
+    -- TODO
+    -- this is inherently inefficient because it looks up vertices
+    -- unnecessarily
+    \p -> let g = view (pevent . graph') p
+              im = view (pevent . eparts) p
+              i = view bc p
+          in  mapMaybe (`IM.lookup` im) (G.reachable g i)
