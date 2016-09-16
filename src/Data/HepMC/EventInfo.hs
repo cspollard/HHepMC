@@ -5,7 +5,6 @@ module Data.HepMC.EventInfo where
 import Control.Lens
 
 import Data.HepMC.Parse
-import Data.Vector
 
 data EventInfo =
     EventInfo
@@ -18,8 +17,8 @@ data EventInfo =
         , _signalProcessBC :: Int
         , _nVertices :: Int
         , _beamParticleBCs :: (Int, Int)
-        , _rndmStateInts :: Vector Int
-        , _eventWeights :: Vector Double
+        , _rndmStateInts :: [Int]
+        , _eventWeights :: [Double]
         } deriving (Eq, Ord, Show)
 
 makeLenses ''EventInfo

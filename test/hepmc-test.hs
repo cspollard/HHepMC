@@ -23,6 +23,10 @@ main = do
             sourceFile f
             =$= (sinkParser parserVersion
                     >> conduitParser parserEvent)
+
+            $$ mapM_C (liftIO . print)
+
+            {-
             =$= mapC snd
             $$  mapM_C (liftIO . findZll)
 
@@ -36,3 +40,4 @@ findZll e = case e ^.. particles . to S.toList . traverse . filtered promptLepto
                 _           -> return ()
 
     where promptLepton = (&&) <$> isChargedLepton <*> prompt
+    -}

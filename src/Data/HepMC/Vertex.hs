@@ -1,56 +1,79 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module Data.HepMC.Vertex where
+module Data.HepMC.Vertex ( Vertex(..), vgraph, vgraph'
+                         , vertID, vertNOrphan
+                         , vertNOutgoing, vertWeights
+                         , Particle(..), pgraph, pgraph'
+                         , partM, partStatus
+                         , partPolarizationTheta, partPolarizationPhi
+                         , partFlows
+                         ) where
 
 import Control.Lens
 
-import Data.Vector (Vector)
-import Data.Set (Set)
+import qualified Data.Graph as G
+
+import Data.HepMC.Internal
 
 import Data.HEP.PID
 import Data.HEP.LorentzVector
 import Data.HepMC.Barcoded
 
+
 data Vertex =
     Vertex
-        { _vertBC :: Int
-        , _vertID :: Int
-        , _vertXYZT :: XYZT
-        , _vertNOrphan :: Int
-        , _vertNOutgoing :: Int
-        , _vertWeights :: Vector Double
-        , _vertParentParts :: Particles
-        , _vertChildParts :: Particles
-        } deriving Show
-
+        { _vgraph :: G.Graph 
+        , _vgraph' :: G.Graph
+        , _rvert :: RawVertex
+        }
 
 data Particle =
     Particle
-        { _partBC :: Int
-        , _partPID :: PID
-        , _partXYZT :: XYZT
-        , _partM :: Double
-        , _partStatus :: Int
-        , _partPolarizationTheta :: Double
-        , _partPolarizationPhi :: Double
-        , _partFlows :: Vector (Int, Int)
-        , _partParentVert :: Vertex
-        , _partChildVert :: Maybe Vertex
-        } deriving Show
-
-
-type Vertices = Set Vertex
-type Particles = Set Particle
-
+        { _pgraph :: G.Graph 
+        , _pgraph' :: G.Graph
+        , _rpart :: RawParticle
+        }
 
 makeLenses ''Vertex
 makeLenses ''Particle
 
-class HasVertices hv where
-    vertices :: Lens' hv Vertices
+instance Show Vertex where
+    show = views rvert show
+
+instance Show Particle where
+    show = views rpart show
+
+vertID :: Lens' Vertex Int
+vertID = rvert . rvertID
+
+vertNOrphan :: Lens' Vertex Int
+vertNOrphan = rvert . rvertNOrphan
+
+vertNOutgoing :: Lens' Vertex Int
+vertNOutgoing = rvert . rvertNOutgoing
+
+vertWeights :: Lens' Vertex [Double]
+vertWeights = rvert . rvertWeights
+
+
+partM :: Lens' Particle Double
+partM = rpart . rpartM
+
+partStatus :: Lens' Particle Int
+partStatus = rpart . rpartStatus
+
+partPolarizationTheta :: Lens' Particle Double
+partPolarizationTheta = rpart . rpartPolarizationTheta
+
+partPolarizationPhi :: Lens' Particle Double
+partPolarizationPhi = rpart . rpartPolarizationPhi
+
+partFlows :: Lens' Particle [(Int, Int)]
+partFlows = rpart . rpartFlows
+
 
 instance Barcoded Vertex where
-    bc = vertBC
+    bc = rvert . rvertBC
 
 instance Eq Vertex where
     (==) = liftBC2 (==)
@@ -59,10 +82,10 @@ instance Ord Vertex where
     compare = liftBC2 compare
 
 instance HasLorentzVector Vertex where
-    toXYZT = vertXYZT
+    toXYZT = rvert . rvertXYZT
 
 instance Barcoded Particle where
-    bc = partBC
+    bc = rpart . rpartBC
 
 instance Eq Particle where
     (==) = liftBC2 (==)
@@ -71,10 +94,7 @@ instance Ord Particle where
     compare = liftBC2 compare
 
 instance HasLorentzVector Particle where
-    toXYZT = partXYZT
+    toXYZT = rpart . rpartXYZT
 
 instance HasPID Particle where
-    pid = partPID
-
-class HasParticles hp where
-    particles :: Lens' hp Particles
+    pid = rpart . rpartPID

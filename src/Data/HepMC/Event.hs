@@ -1,43 +1,45 @@
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TupleSections #-}
 
 module Data.HepMC.Event
     ( module X
     , Event(..)
-    , graph
+    , eobjs
     , parserEvent
     ) where
 
 import Control.Lens
 
+import qualified Data.Graph as G
 import qualified Data.IntMap as IM
 
-import qualified Data.Set as S
+import Data.HepMC.Internal
 
 import Data.HEP.LorentzVector as X
 import Data.HepMC.Parse
 import Data.HepMC.Vertex as X
 import Data.HepMC.EventHeader as X
-import Data.HepMC.EventGraph as X
+
+
+data GraphObj = V Vertex
+              | P Particle
+              deriving Show
+
+makePrisms ''GraphObj
 
 data Event =
     Event
-    { _graph :: EventGraph
-    -- eventInfo :: EventInfo,
-    -- weightNames :: Maybe [Text],
-    -- units :: Units,
-    -- crossSection :: Maybe CrossSection,
-    -- heavyIonInfo :: Maybe HeavyIonInfo,
-    -- pdfInfo :: Maybe PDFInfo
-    } deriving Show
+        { _eobjs :: IM.IntMap GraphObj
+        -- eventInfo :: EventInfo,
+        -- weightNames :: Maybe [Text],
+        -- units :: Units,
+        -- crossSection :: Maybe CrossSection,
+        -- heavyIonInfo :: Maybe HeavyIonInfo,
+        -- pdfInfo :: Maybe PDFInfo
+        } deriving Show
 
 
 makeLenses ''Event
-
-instance HasVertices Event where
-    vertices = graph . vertices
-
-instance HasParticles Event where
-    particles = graph . particles
 
 parserXYZT :: Parser XYZT
 parserXYZT = XYZT
@@ -48,73 +50,54 @@ parserXYZT = XYZT
 
 
 -- parse the vertex barcode and the vertex.
-toVertex :: Parser (Int, Particles -> Particles -> Vertex)
-toVertex = flip (<?>) "toVertex" $ do
+parseRawVertex :: Parser ((Int, RawVertex), [Int] -> [(Int, Int)])
+parseRawVertex = flip (<?>) "parseRawVertex" $ do
     char 'V' >> skipSpace
     vbc <- signed decimal <* skipSpace <?> "vertBC"
-    v <- Vertex vbc
-        <$> (signed decimal <* skipSpace <?> "vertID")
-        <*> (parserXYZT <* skipSpace <?> "vertXYZT")
-        <*> (decimal <* skipSpace <?> "vertNOrphan")
-        <*> (decimal <* skipSpace <?> "vertNOutgoing")
-        <*> (hepmcList double <* endOfLine <?> "vertWeights")
+    v <- RawVertex vbc
+            <$> (signed decimal <* skipSpace <?> "vertID")
+            <*> (parserXYZT <* skipSpace <?> "vertXYZT")
+            <*> (decimal <* skipSpace <?> "vertNOrphan")
+            <*> (decimal <* skipSpace <?> "vertNOutgoing")
+            <*> (hepmcList double <* endOfLine <?> "vertWeights")
 
-    return (vbc, v)
+    return ((vbc, v), fmap (vbc,))
 
 
-toParticle :: Parser (Int, Int, Vertex -> Maybe Vertex -> Particle)
-toParticle = flip (<?>) "toParticle" $ do
+parseRawParticle :: Parser ((Int, RawParticle), [(Int, Int)])
+parseRawParticle = flip (<?>) "parseRawParticle" $ do
     char 'P' >> skipSpace
     pbc <- signed decimal <* skipSpace
-    p <- Particle pbc
-        <$> signed decimal <* skipSpace
-        <*> parserXYZT <* skipSpace
-        <*> double <* skipSpace
-        <*> signed decimal <* skipSpace
-        <*> double <* skipSpace
-        <*> double <* skipSpace
+    p <- RawParticle pbc
+            <$> signed decimal <* skipSpace
+            <*> parserXYZT <* skipSpace
+            <*> double <* skipSpace
+            <*> signed decimal <* skipSpace
+            <*> double <* skipSpace
+            <*> double <* skipSpace
 
     vbc <- signed decimal <* skipSpace
     p' <- p <$> hepmcList (tuple (signed decimal) (signed decimal)) <* endOfLine
-    return (pbc, vbc, p')
+    return ((pbc, p'), [(pbc, vbc)]) 
 
-
-eventGraph :: Parser EventGraph
-eventGraph = do
-    (vertFs, partFs, vertPs, vertDs, partP, partD) <-
-            f (IM.empty, IM.empty, IM.empty, IM.empty, IM.empty, IM.empty)
-
-    let (vs, ps) = let
-            maybeInt x = if x == 0 then Nothing else Just x
-            vertIM = IM.mapWithKey (\k v -> v (S.fromList . map (partIM IM.!) $ (vertPs IM.! k)) (S.fromList . map (partIM IM.!) $ (vertDs IM.! k))) vertFs
-            partIM = IM.mapWithKey (\k p -> p (vertIM IM.! (partP IM.! k)) ((vertIM IM.!) <$> maybeInt (partD IM.! k))) partFs
-            in (vertIM, partIM)
-
-    return $ EventGraph (S.fromList $ IM.elems vs) (S.fromList $ IM.elems ps) vs ps
-
-    where
-        -- TODO
-        -- certainly could be improved.
-        -- loop over particles instead of unzip3
-        f (vfs, pfs, vps, vds, pps, pds) = do
-            (vbc, tv) <- toVertex
-            (pbcs, vbcs, tps) <- unzip3 <$> many toParticle
-
-            let vfs' = IM.insert vbc tv vfs
-            let pfs' = IM.union pfs $ IM.fromList (zip pbcs tps)
-            -- TODO
-            -- problem here?
-            let vps' = IM.unionWith (++) vps $ IM.fromList (zip vbcs $ map (:[]) pbcs)
-            let vds' = IM.insert vbc pbcs vds
-            let pps' = IM.union pps $ IM.fromList (zip pbcs $ repeat vbc)
-            let pds' = IM.union pds $ IM.fromList (zip pbcs vbcs)
-
-            let x = (vfs', pfs', vps', vds', pps', pds')
-
-            f x <|> return x
 
 
 parserEvent :: Parser Event
 parserEvent = do
     _ <- many parseHeaderLine
-    Event <$> eventGraph
+    (vs, pps, ees) <- fmap unzip3 <$> many $ do
+            (v, vef) <- parseRawVertex
+            (ps, pes) <- unzip <$> many parseRawParticle
+            let ves = vef $ fmap fst ps
+            return (v, ps, ves++concat pes)
+
+    let ps = concat pps
+    let is = fmap fst vs ++ fmap fst ps
+    let mx = maximum is
+    let mn = minimum is
+    let g = G.buildG (mn, mx) $ concat ees
+    let g' = G.transposeG g
+    let gos = (fmap.fmap) (V . Vertex g g') vs
+                ++ (fmap.fmap) (P . Particle g g') ps
+
+    return $ Event (IM.fromList gos)

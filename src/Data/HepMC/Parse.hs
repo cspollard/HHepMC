@@ -8,10 +8,10 @@ module Data.HepMC.Parse
 ) where
 
 import Control.Applicative as X (Alternative(..))
+import Control.Monad (replicateM)
 import Data.Attoparsec.ByteString.Char8 as X hiding (isEndOfLine)
 import Data.ByteString (ByteString)
 import Data.Text.Lazy (Text, pack)
-import Data.Vector
 
 parserVersion :: Parser ByteString
 parserVersion = do
@@ -36,7 +36,7 @@ quote = pack <$> (char '"' *> manyTill anyChar (char '"'))
 
 -- parse a vector of objects: first is the decimal length of the list
 -- followed by the objects (separated by spaces)
-hepmcList :: Parser a -> Parser (Vector a)
+hepmcList :: Parser a -> Parser [a]
 hepmcList p = do
     n <- decimal
     replicateM n (skipSpace *> p)

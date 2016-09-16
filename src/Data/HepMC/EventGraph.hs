@@ -1,44 +1,33 @@
-{-# LANGUAGE TemplateHaskell #-}
-
-
 module Data.HepMC.EventGraph where
 
 import Control.Lens hiding (children)
 
-import qualified Data.Set as S
+import Data.Array
+
 import Data.IntMap (IntMap)
 import Data.HepMC.Vertex
+
+import Data.HepMC.Barcoded
+
 import qualified Data.HEP.PID as PID
 
 
--- do we need an IntMap of these guys?
-data EventGraph =
-    EventGraph
-        { _egVerts :: Vertices
-        , _egParts :: Particles
-        , _egVertsMap :: IntMap Vertex
-        , _egPartsMap :: IntMap Particle
-        } deriving Show
-
-makeLenses ''EventGraph
-
-instance HasVertices EventGraph where
-    vertices = egVerts
-
-instance HasParticles EventGraph where
-    particles = egParts
 
 final :: Particle -> Bool
-final = null . view partChildVert
+final p = null (view pgraph p ! view bc p)
+
 
 -- TODO
 -- this needs to be looked into.
 prompt :: Particle -> Bool
-prompt = null . S.filter (\p' -> view partStatus p' == 2 && (PID.isHadron p' || PID.isTau p')) . ancestors
+prompt = null . view (filtered unstable . ancestors)
+    where unstable p = view partStatus p == 2 && (PID.isHadron p || PID.isTau p)
 
-parents, children, descendants, ancestors :: Particle -> Particles
+parents, children, descendants, ancestors :: Traversal' Particle Particle
 
-parents = view vertParentParts . view partParentVert
+parents p = view pgraph' p ! view bc p
+
+view vertParentParts . view partParentVert
 children p = case view partChildVert p of
                 Nothing -> S.empty
                 Just v -> view vertChildParts v
