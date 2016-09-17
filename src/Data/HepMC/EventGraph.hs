@@ -2,6 +2,7 @@ module Data.HepMC.EventGraph where
 
 import Control.Lens hiding (children)
 
+import Data.Array ((!))
 import Data.Maybe (mapMaybe)
 
 import qualified Data.Graph as G
@@ -14,7 +15,7 @@ import Data.HepMC.Event
 
 
 final :: Particle -> Bool
-final = null . view pchildren
+final = null . toListOf children
 
 particles :: Traversal' Event Particle
 particles = eparts . traverse
@@ -22,18 +23,28 @@ particles = eparts . traverse
 vertices :: Traversal' Event Vertex
 vertices = everts . traverse
 
--- TODO
--- this needs to be looked into.
+
 prompt :: Particle -> Bool
 prompt = null . view (filtered unstable . ancestors)
     where unstable p = view partStatus p == 2 && (PID.isHadron p || PID.isTau p)
 
--- NB:
--- traversals don't seem safe in self-referential structures...
+-- TODO
+-- make these traversals
 parents, children, descendants, ancestors :: Monoid r => Getting r Particle [Particle]
 
-parents = pparents . traverse . vparents
-children = pchildren . traverse . vchildren
+parents = to $
+    \p -> let g' = view (pevent.graph') p
+              imp = view (pevent.eparts) p
+              vs = g' ! view bc p
+              ps = concatMap (g' !) vs
+          in  map (imp IM.!) ps
+
+children = to $
+    \p -> let g = view (pevent.graph) p
+              imp = view (pevent.eparts) p
+              vs = g ! view bc p
+              ps = concatMap (g !) vs
+          in  map (imp IM.!) ps
 
 descendants = to $
     -- TODO

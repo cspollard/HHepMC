@@ -6,11 +6,11 @@ module Data.HepMC.Event
     , Event(..)
     , eparts, everts, graph, graph'
     , parserEvent
-    , Vertex(..), vparents, vchildren
+    , Vertex(..)
     , vertID, vertNOrphan
     , vertNOutgoing, vertWeights
     , vevent
-    , Particle(..), pparents, pchildren
+    , Particle(..)
     , partM, partStatus
     , partPolarizationTheta, partPolarizationPhi
     , partFlows, pevent
@@ -18,7 +18,6 @@ module Data.HepMC.Event
 
 import Control.Lens
 
-import Data.Array
 import qualified Data.Graph as G
 import qualified Data.IntMap as IM
 
@@ -32,17 +31,13 @@ import Data.HepMC.EventHeader as X
 
 data Vertex =
     Vertex
-        { _vparents :: [Particle]
-        , _vchildren :: [Particle]
-        , _vevent :: Event
+        { _vevent :: Event
         , _rvert :: RawVertex
         }
 
 data Particle =
     Particle
-        { _pparents :: [Vertex]
-        , _pchildren :: [Vertex]
-        , _pevent :: Event
+        { _pevent :: Event
         , _rpart :: RawParticle
         }
 
@@ -188,8 +183,8 @@ parserEvent = do
     let g = G.buildG (mn, mx) $ concat ees
     let g' = G.transposeG g
 
-    let partMap = IM.mapWithKey (\i -> Particle ((vertMap IM.!) <$> (g' ! i)) ((vertMap IM.!) <$> (g ! i)) evt) pmap
-        vertMap = IM.mapWithKey (\i -> Vertex ((partMap IM.!) <$> (g' ! i)) ((partMap IM.!) <$> (g ! i)) evt) vmap
+    let partMap = fmap (Particle evt) pmap
+        vertMap = fmap (Vertex evt) vmap
         evt = Event partMap vertMap g g' 
 
     return evt
