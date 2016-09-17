@@ -167,7 +167,9 @@ parseRawParticle = flip (<?>) "parseRawParticle" $ do
 parserEvent :: Parser Event
 parserEvent = do
     _ <- many parseHeaderLine
-    (vs, pps, ees) <- fmap unzip3 <$> many $ do
+    -- TODO
+    -- event should have many1 vertices?
+    (vs, pps, ees) <- fmap unzip3 <$> many1 $ do
             (v, vef) <- parseRawVertex
             (ps, pes) <- unzip <$> many parseRawParticle
             let ves = vef $ fmap fst ps

@@ -15,7 +15,7 @@ import Data.HepMC.Event
 
 
 final :: Particle -> Bool
-final = null . toListOf children
+final = null . view children
 
 particles :: Traversal' Event Particle
 particles = eparts . traverse
@@ -50,16 +50,20 @@ descendants = to $
     -- TODO
     -- this is inherently inefficient because it looks up vertices
     -- unnecessarily
-    \p -> let g = view (pevent . graph) p
-              im = view (pevent . eparts) p
+    \p -> let g = view (pevent.graph) p
+              im = view (pevent.eparts) p
               i = view bc p
-          in  mapMaybe (`IM.lookup` im) (G.reachable g i)
+          -- tail of reachables since the current node is always the
+          -- first one listed
+          in  mapMaybe (`IM.lookup` im) (tail $ G.reachable g i)
 
 ancestors = to $
     -- TODO
     -- this is inherently inefficient because it looks up vertices
     -- unnecessarily
-    \p -> let g = view (pevent . graph') p
-              im = view (pevent . eparts) p
+    \p -> let g = view (pevent.graph') p
+              im = view (pevent.eparts) p
               i = view bc p
-          in  mapMaybe (`IM.lookup` im) (G.reachable g i)
+          -- tail of reachables since the current node is always the
+          -- first one listed
+          in  mapMaybe (`IM.lookup` im) (tail $ G.reachable g i)
