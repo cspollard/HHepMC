@@ -39,7 +39,7 @@ main = do
 findZll :: Event -> IO ()
 findZll e = case e ^.. particles . filtered promptLepton of
                 ls@[_, _] -> do
-                        -- traverseOf_ (traverse . pid) print ls
+                        traverseOf_ (traverse . pid) print ls
                         views lvM print (foldOf (traverse . toXYZT) ls)
 
                 xs -> print "nope"
