@@ -15,7 +15,7 @@ import Data.HepMC.Event
 
 
 final :: Particle -> Bool
-final = null . view children
+final = null . toListOf children
 
 particles :: Traversal' Event Particle
 particles = eparts . traverse
@@ -24,29 +24,29 @@ vertices :: Traversal' Event Vertex
 vertices = everts . traverse
 
 
-prompt :: Particle -> Bool
-prompt = null . view (filtered unstable . ancestors)
-    where unstable p = view partStatus p == 2 && (PID.isHadron p || PID.isTau p)
+fromHadron :: Particle -> Bool
+fromHadron = not . null . toListOf (ancestors . filtered unstable)
+    where unstable p = view partStatus p == 2 && PID.isHadron p
 
 -- TODO
 -- make these traversals
-parents, children, descendants, ancestors :: Monoid r => Getting r Particle [Particle]
+parents, children, descendants, ancestors :: Fold Particle Particle
 
-parents = to $
+parents = folding $
     \p -> let g' = view (pevent.graph') p
               imp = view (pevent.eparts) p
               vs = g' ! view bc p
               ps = concatMap (g' !) vs
           in  map (imp IM.!) ps
 
-children = to $
+children = folding $
     \p -> let g = view (pevent.graph) p
               imp = view (pevent.eparts) p
               vs = g ! view bc p
               ps = concatMap (g !) vs
           in  map (imp IM.!) ps
 
-descendants = to $
+descendants = folding $
     -- TODO
     -- this is inherently inefficient because it looks up vertices
     -- unnecessarily
@@ -57,7 +57,7 @@ descendants = to $
           -- first one listed
           in  mapMaybe (`IM.lookup` im) (tail $ G.reachable g i)
 
-ancestors = to $
+ancestors = folding $
     -- TODO
     -- this is inherently inefficient because it looks up vertices
     -- unnecessarily

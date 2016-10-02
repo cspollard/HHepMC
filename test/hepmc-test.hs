@@ -1,8 +1,7 @@
 module Main where
 
 import Control.Lens hiding (children)
-
-import Data.Either (isRight)
+import Control.Monad ((>=>))
 
 import Conduit
 import Data.Conduit.Attoparsec
@@ -26,8 +25,8 @@ main = do
 
             =$= catEithersC
             =$= mapC snd
-            -- $$  mapM_C (liftIO . print . toListOf (particles.filtered final))
-            $$  mapM_C (liftIO . findZll)
+            $$  mapM_C (liftIO . (mapM_ print >=> \_ -> putStrLn "end event") . toListOf (particles.filtered promptLepton))
+            -- $$  mapM_C (liftIO . findZll)
 
     where catEithersC = do
             x <- await
@@ -36,12 +35,14 @@ main = do
                 _              -> return ()
 
 
+promptLepton :: Particle -> Bool
+promptLepton = and . sequenceA [isChargedLepton, final, not . fromHadron]
+
 findZll :: Event -> IO ()
 findZll e = case e ^.. particles . filtered promptLepton of
                 ls@[_, _] -> do
                         traverseOf_ (traverse . pid) print ls
                         views lvM print (foldOf (traverse . toXYZT) ls)
 
-                xs -> print "nope"
+                _ -> print "nope"
 
-    where promptLepton = and . sequenceA [isChargedLepton, prompt, final]
