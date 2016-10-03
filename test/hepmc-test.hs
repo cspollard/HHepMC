@@ -1,19 +1,25 @@
 module Main where
 
+import Debug.Trace
+
 import Control.Lens hiding (children)
 
 import Conduit
 import Data.Conduit.Attoparsec
 
 import Data.List (sortOn)
+import Data.Ord (Down(..))
 
 import Data.HEP.LorentzVector
 import Data.HEP.PID
 
-import Data.HepMC.Parse
 import Data.HepMC.Barcoded
+import Data.HepMC.Parse
 import Data.HepMC.Event
 import Data.HepMC.EventGraph
+
+import Data.Jet
+
 import System.Environment (getArgs)
 
 
@@ -27,10 +33,10 @@ main = do
 
             =$= catEithersC
             =$= mapC snd
-            =$= mapC (toListOf (particles.filtered promptLepton))
-            =$= mapC (sortOn (negate . view lvPt))
-            $$  mapM_C (liftIO . mapM_ (views bc print))
-            -- $$  mapM_C (liftIO . findZll)
+            =$= mapC (sortOn (Down . view lvPt) . toListOf (particles . filtered finalHadron))
+            $$  mapM_C (liftIO . (\xs -> print (length xs) >> views (traverse . bc) print xs))
+            -- =$= mapC (sortOn (Down . view lvPt) . map (view toPtEtaPhiE . snd . obj) . cluster akt04)
+            -- $$  mapM_C (liftIO . (\xs -> putStrLn "new event" >> mapM_ print xs))
 
     where catEithersC = do
             x <- await
@@ -39,14 +45,14 @@ main = do
                 _              -> return ()
 
 
+finalHadron :: Particle -> Bool
+finalHadron = and . sequenceA [isHadron, final]
+
 promptLepton :: Particle -> Bool
 promptLepton = and . sequenceA [isChargedLepton, final, not . fromHadron]
 
-findZll :: Event -> IO ()
-findZll e = case e ^.. particles . filtered promptLepton of
-                ls@[_, _] -> do
-                        traverseOf_ (traverse . pid) print ls
-                        views lvM print (foldOf (traverse . toXYZT) ls)
-
-                _ -> print "nope"
-
+akt04 :: Clustering Double
+akt04 = Clustering d d0
+    where
+        d p p' = (view lvPt p `min` view lvPt p') ^^ (-1) * lvDR p p' / 0.4
+        d0 p = view lvPt p ^^ (-1)
