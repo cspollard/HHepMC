@@ -1,15 +1,17 @@
 module Main where
 
 import Control.Lens hiding (children)
-import Control.Monad ((>=>))
 
 import Conduit
 import Data.Conduit.Attoparsec
+
+import Data.List (sortOn)
 
 import Data.HEP.LorentzVector
 import Data.HEP.PID
 
 import Data.HepMC.Parse
+import Data.HepMC.Barcoded
 import Data.HepMC.Event
 import Data.HepMC.EventGraph
 import System.Environment (getArgs)
@@ -25,7 +27,9 @@ main = do
 
             =$= catEithersC
             =$= mapC snd
-            $$  mapM_C (liftIO . (mapM_ print >=> \_ -> putStrLn "end event") . toListOf (particles.filtered promptLepton))
+            =$= mapC (toListOf (particles.filtered promptLepton))
+            =$= mapC (sortOn (negate . view lvPt))
+            $$  mapM_C (liftIO . mapM_ (views bc print))
             -- $$  mapM_C (liftIO . findZll)
 
     where catEithersC = do
