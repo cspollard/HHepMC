@@ -34,7 +34,7 @@ library
 
   other-extensions:   OverloadedStrings
   build-depends:      base == 4.9.*
-                    , lens == 4.14.*
+                    , lens == 4.15.*
                     , bytestring == 0.10.*
                     , array == 0.5.*
                     , containers == 0.5.*
@@ -53,9 +53,9 @@ executable hepmc-test
   ghc-prof-options:    -Wall -O0 -prof -caf-all
 
   build-depends:      base == 4.9.*
-                    , lens == 4.14.*
+                    , lens == 4.15.*
                     , conduit == 1.2.*
-                    , conduit-combinators == 1.0.*
+                    , conduit-combinators == 1.1.*
                     , conduit-extra == 1.1.*
                     , bytestring == 0.10.*
                     , containers == 0.5.*
