@@ -1,16 +1,16 @@
 module Data.HepMC.EventGraph where
 
-import Control.Lens hiding (children)
+import           Control.Lens        hiding (children)
 
-import Data.Array ((!))
-import Data.Maybe (mapMaybe)
+import           Data.Array          ((!))
+import           Data.Maybe          (mapMaybe)
 
-import qualified Data.Graph as G
-import qualified Data.IntMap as IM
+import qualified Data.Graph          as G
+import qualified Data.IntMap         as IM
 
-import qualified Data.HEP.PID as PID
-import Data.HepMC.Barcoded
-import Data.HepMC.Event
+import qualified Data.HEP.PID        as PID
+import           Data.HepMC.Barcoded
+import           Data.HepMC.Event
 
 
 
@@ -28,8 +28,6 @@ fromHadron :: Particle -> Bool
 fromHadron = not . null . toListOf (ancestors . filtered unstable)
     where unstable p = view partStatus p == 2 && PID.isHadron p
 
--- TODO
--- make these traversals
 parents, children, descendants, ancestors :: Fold Particle Particle
 
 parents = folding $

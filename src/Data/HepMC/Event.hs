@@ -1,5 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TupleSections #-}
+{-# LANGUAGE TupleSections   #-}
 
 module Data.HepMC.Event
     ( module X
@@ -16,50 +16,49 @@ module Data.HepMC.Event
     , partFlows, pevent
     ) where
 
-import Control.Lens
+import           Control.Lens
 
-import qualified Data.Graph as G
-import qualified Data.IntMap as IM
+import qualified Data.Graph             as G
+import           Data.HEP.LorentzVector as X
+import           Data.HEP.PID
+import qualified Data.IntMap            as IM
 
-import Data.HepMC.Internal
-
-import Data.HepMC.Barcoded
-import Data.HEP.LorentzVector as X
-import Data.HEP.PID
-import Data.HepMC.Parse
-import Data.HepMC.EventHeader as X
+import           Data.HepMC.Barcoded
+import           Data.HepMC.EventHeader as X
+import           Data.HepMC.Internal
+import           Data.HepMC.Parse
 
 data Vertex =
-    Vertex
-        { _vevent :: Event
-        , _rvert :: RawVertex
-        }
+  Vertex
+    { _vevent :: Event
+    , _rvert  :: RawVertex
+    }
 
 data Particle =
-    Particle
-        { _pevent :: Event
-        , _rpart :: RawParticle
-        }
+  Particle
+    { _pevent :: Event
+    , _rpart  :: RawParticle
+    }
 
 instance Show Vertex where
-    show = show . _rvert
+  show = show . _rvert
 
 instance Show Particle where
-    show = show . _rpart
+  show = show . _rpart
 
 data Event =
-    Event
-        { _eparts :: IM.IntMap Particle
-        , _everts :: IM.IntMap Vertex
-        , _graph :: G.Graph
-        , _graph' :: G.Graph
-        -- eventInfo :: EventInfo,
-        -- weightNames :: Maybe [Text],
-        -- units :: Units,
-        -- crossSection :: Maybe CrossSection,
-        -- heavyIonInfo :: Maybe HeavyIonInfo,
-        -- pdfInfo :: Maybe PDFInfo
-        } deriving Show
+  Event
+    { _eparts :: IM.IntMap Particle
+    , _everts :: IM.IntMap Vertex
+    , _graph  :: G.Graph
+    , _graph' :: G.Graph
+    -- eventInfo :: EventInfo,
+    -- weightNames :: Maybe [Text],
+    -- units :: Units,
+    -- crossSection :: Maybe CrossSection,
+    -- heavyIonInfo :: Maybe HeavyIonInfo,
+    -- pdfInfo :: Maybe PDFInfo
+    } deriving Show
 
 
 makeLenses ''Vertex
@@ -96,35 +95,36 @@ partFlows = rpart . rpartFlows
 
 
 instance Barcoded Vertex where
-    bc = rvert . rvertBC
+  bc = rvert . rvertBC
 
 instance Eq Vertex where
-    (==) = liftBC2 (==)
+  (==) = liftBC2 (==)
 
 instance Ord Vertex where
-    compare = liftBC2 compare
+  compare = liftBC2 compare
 
 instance HasLorentzVector Vertex where
-    toXYZT = rvert . rvertXYZT
+  toXYZT = rvert . rvertXYZT
 
 instance Barcoded Particle where
-    bc = rpart . rpartBC
+  bc = rpart . rpartBC
 
 instance Eq Particle where
-    (==) = liftBC2 (==)
+  (==) = liftBC2 (==)
 
 instance Ord Particle where
-    compare = liftBC2 compare
+  compare = liftBC2 compare
 
 instance HasLorentzVector Particle where
-    toXYZT = rpart . rpartXYZT
+  toXYZT = rpart . rpartXYZT
 
 instance HasPID Particle where
-    pid = rpart . rpartPID
+  pid = rpart . rpartPID
 
 
 parserXYZT :: Parser XYZT
-parserXYZT = XYZT
+parserXYZT =
+  XYZT
     <$> double <* skipSpace
     <*> double <* skipSpace
     <*> double <* skipSpace
@@ -133,60 +133,67 @@ parserXYZT = XYZT
 
 -- parse the vertex barcode and the vertex.
 parseRawVertex :: Parser ((Int, RawVertex), [Int] -> [(Int, Int)])
-parseRawVertex = flip (<?>) "parseRawVertex" $ do
+parseRawVertex =
+  flip (<?>) "parseRawVertex" $ do
     char 'V' >> skipSpace
     vbc <- signed decimal <* skipSpace <?> "vertBC"
-    v <- RawVertex vbc
-            <$> (signed decimal <* skipSpace <?> "vertID")
-            <*> (parserXYZT <* skipSpace <?> "vertXYZT")
-            <*> (decimal <* skipSpace <?> "vertNOrphan")
-            <*> (decimal <* skipSpace <?> "vertNOutgoing")
-            <*> (hepmcList double <* endOfLine <?> "vertWeights")
+    v <-
+      RawVertex vbc
+        <$> (signed decimal <* skipSpace <?> "vertID")
+        <*> (parserXYZT <* skipSpace <?> "vertXYZT")
+        <*> (decimal <* skipSpace <?> "vertNOrphan")
+        <*> (decimal <* skipSpace <?> "vertNOutgoing")
+        <*> (hepmcList double <* endOfLine <?> "vertWeights")
 
     return ((vbc, v), fmap (vbc,))
 
 
 parseRawParticle :: Parser ((Int, RawParticle), [(Int, Int)])
-parseRawParticle = flip (<?>) "parseRawParticle" $ do
+parseRawParticle =
+  flip (<?>) "parseRawParticle" $ do
     char 'P' >> skipSpace
     pbc <- signed decimal <* skipSpace
-    p <- RawParticle pbc
-            <$> signed decimal <* skipSpace
-            <*> parserXYZT <* skipSpace
-            <*> double <* skipSpace
-            <*> signed decimal <* skipSpace
-            <*> double <* skipSpace
-            <*> double <* skipSpace
+    p <-
+      RawParticle pbc
+        <$> signed decimal <* skipSpace
+        <*> parserXYZT <* skipSpace
+        <*> double <* skipSpace
+        <*> signed decimal <* skipSpace
+        <*> double <* skipSpace
+        <*> double <* skipSpace
 
     vbc <- signed decimal <* skipSpace
     p' <- p <$> hepmcList (tuple (signed decimal) (signed decimal)) <* endOfLine
-    return ((pbc, p'), if vbc == 0 then [] else [(pbc, vbc)]) 
+    return ((pbc, p'), if vbc == 0 then [] else [(pbc, vbc)])
 
 
 
 parserEvent :: Parser Event
 parserEvent = do
-    _ <- many parseHeaderLine
-    -- TODO
-    -- event should have many1 vertices?
-    (vs, pps, ees) <- fmap unzip3 <$> many1 $ do
-            (v, vef) <- parseRawVertex
-            (ps, pes) <- unzip <$> many parseRawParticle
-            let ves = vef $ fmap fst ps
-            return (v, ps, ves++concat pes)
+  -- TODO
+  -- event info...
+  _ <- many parseHeaderLine
+  -- TODO
+  -- event should have many1 vertices?
+  (vs, pps, ees) <-
+    fmap unzip3 <$> many1 $ do
+      (v, vef) <- parseRawVertex
+      (ps, pes) <- unzip <$> many parseRawParticle
+      let ves = vef $ fmap fst ps
+      return (v, ps, ves++concat pes)
 
-    let ps = concat pps
-    let pmap = IM.fromList ps
-    let vmap = IM.fromList vs
+  let ps = concat pps
+      rparts = IM.fromList ps
+      rverts = IM.fromList vs
 
-    let is = fmap fst vs ++ fmap fst ps
-    let mx = maximum is
-    let mn = minimum is
-    let g = G.buildG (mn, mx) $ concat ees
-    let g' = G.transposeG g
+      is = fmap fst vs ++ fmap fst ps
+      mx = maximum is
+      mn = minimum is
+      g = G.buildG (mn, mx) $ concat ees
+      g' = G.transposeG g
 
-    let partMap = fmap (Particle evt) pmap
-        vertMap = fmap (Vertex evt) vmap
-        evt = Event partMap vertMap g g' 
+      partmap = Particle evt <$> rparts
+      vertmap = Vertex evt <$> rverts
+      evt = Event partmap vertmap g g'
 
-    return evt
+  return evt
