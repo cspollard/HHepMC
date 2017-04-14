@@ -18,15 +18,15 @@ cabal-version:       >=1.10
 
 
 library
-  exposed-modules:    Data.HepMC.Barcoded
-                    , Data.HepMC.Event
-                    , Data.HepMC.EventGraph
-                    , Data.HepMC.EventInfo
-                    , Data.HepMC.HeavyIonInfo
-                    , Data.HepMC.Parse
-                    , Data.HepMC.PDFInfo
-                    , Data.HepMC.Units
-  other-modules:      Data.HepMC.Internal
+  exposed-modules:    HepMC.Barcoded
+                    , HepMC.Event
+                    , HepMC.EventGraph
+                    , HepMC.EventInfo
+                    , HepMC.HeavyIonInfo
+                    , HepMC.Parse
+                    , HepMC.PDFInfo
+                    , HepMC.Units
+  other-modules:      HepMC.Internal
 
   ghc-options:         -Wall
   ghc-prof-options:    -Wall -prof -caf-all
