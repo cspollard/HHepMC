@@ -1,17 +1,20 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module HepMC.Parse
-    ( fromFile
+    ( module X
+    , tuple, vector, fromFile
     ) where
 
-import           Control.Applicative              ((<|>))
+import           Control.Applicative              as X ((<|>))
+import           Control.Applicative              (liftA2)
 import           Control.Exception.Base
 import           Control.Monad                    (void)
 import           Control.Monad.Catch
 import           Control.Monad.IO.Class
-import           Data.Attoparsec.ByteString.Char8 hiding (parse)
+import           Data.Attoparsec.ByteString.Char8 as X hiding (parse)
 import           Data.ByteString                  (ByteString)
 import qualified Data.Map.Strict                  as M
+import qualified Data.Vector.Generic              as V
 import           Pipes                            ((>->))
 import qualified Pipes                            as P
 import qualified Pipes.Attoparsec                 as PA
@@ -20,6 +23,14 @@ import qualified Pipes.Parse                      as PP
 import qualified Pipes.Prelude                    as P
 import           System.IO
 
+
+tuple :: Applicative f => f a -> f b -> f (a, b)
+tuple = liftA2 (,)
+
+vector :: V.Vector v a => Parser a -> Parser (v a)
+vector p = do
+  n <- decimal <* skipSpace
+  V.replicateM n p
 
 eol :: Char -> Bool
 eol = isEndOfLine . toEnum . fromEnum
@@ -86,7 +97,7 @@ evtHeaderLine = do
 
 -- -- parse a vector of objects: first is the decimal length of the list
 -- -- followed by the objects (separated by spaces)
--- hepmcList :: Parser a -> Parser [a]
--- hepmcList p = do
+-- vector :: Parser a -> Parser [a]
+-- vector p = do
 --     n <- decimal
 --     replicateM n (skipSpace *> p)

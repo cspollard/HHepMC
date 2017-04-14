@@ -24,7 +24,6 @@ import           Data.HEP.PID
 import qualified Data.IntMap            as IM
 
 import           HepMC.Barcoded
-import           HepMC.EventHeader as X
 import           HepMC.Internal
 import           HepMC.Parse
 
@@ -143,7 +142,7 @@ parseRawVertex =
         <*> (parserXYZT <* skipSpace <?> "vertXYZT")
         <*> (decimal <* skipSpace <?> "vertNOrphan")
         <*> (decimal <* skipSpace <?> "vertNOutgoing")
-        <*> (hepmcList double <* endOfLine <?> "vertWeights")
+        <*> (vector double <* endOfLine <?> "vertWeights")
 
     return ((vbc, v), fmap (vbc,))
 
@@ -163,7 +162,7 @@ parseRawParticle =
         <*> double <* skipSpace
 
     vbc <- signed decimal <* skipSpace
-    p' <- p <$> hepmcList (tuple (signed decimal) (signed decimal)) <* endOfLine
+    p' <- p <$> vector (tuple (signed decimal) (signed decimal)) <* endOfLine
     return ((pbc, p'), if vbc == 0 then [] else [(pbc, vbc)])
 
 
