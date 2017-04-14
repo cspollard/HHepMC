@@ -1,7 +1,8 @@
 module Data.HepMC.EventHeader where
 
-import Data.ByteString
-import Data.HepMC.Parse
+import           Data.Attoparsec.ByteString.Char8
+import           Data.ByteString
+import           Data.HepMC.Parse
 
 
 -- type WeightNames = Vector Text
@@ -10,12 +11,13 @@ import Data.HepMC.Parse
 -- parserWeightNames = hepMCList
 
 
+
 type CrossSection = (Double, Double)
 
 parserCrossSection :: Parser CrossSection
 parserCrossSection = do
     char 'C' >> skipSpace
-    tuple (double <* skipSpace) (double <* skipSpace)
+    (,) <$> (double <* skipSpace) <*> (double <* skipSpace)
 
 
 parseHeaderLine :: Parser (Char, ByteString)

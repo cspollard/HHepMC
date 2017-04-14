@@ -4,4 +4,4 @@ packages:
 - '.'
 - ../hhep.git/
 extra-deps:
-resolver: lts-8.0
+resolver: lts-8.9

@@ -6,11 +6,11 @@ module Data.HepMC.Event
     , Event(..)
     , eparts, everts, graph, graph'
     , parserEvent
-    , Vertex(..)
+    , Vertex
     , vertID, vertNOrphan
     , vertNOutgoing, vertWeights
     , vevent
-    , Particle(..)
+    , Particle
     , partM, partStatus
     , partPolarizationTheta, partPolarizationPhi
     , partFlows, pevent
