@@ -1,17 +1,17 @@
 module HepMC.Barcoded where
 
-import Control.Lens
+import           Control.Lens
 
-import qualified Data.IntMap as IM
-import Data.IntMap (IntMap)
+import           Data.IntMap  (IntMap)
+import qualified Data.IntMap  as IM
 
 type BC = Int
 
 class Barcoded b where
-    bc :: Lens' b BC
+  bc :: Lens' b BC
 
 instance (Barcoded a, Barcoded b) => Barcoded (Either a b) where
-    bc = choosing bc bc
+  bc = choosing bc bc
 
 
 liftBC :: Barcoded a => (BC -> b) -> a -> b

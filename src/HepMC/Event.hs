@@ -16,13 +16,12 @@ module HepMC.Event
     , partFlows, pevent
     ) where
 
+import           Data.Attoparsec.ByteString.Char8 as X hiding (parse)
 import           Control.Lens
-
 import qualified Data.Graph             as G
 import           Data.HEP.LorentzVector as X
 import           Data.HEP.PID
 import qualified Data.IntMap            as IM
-
 import           HepMC.Barcoded
 import           HepMC.Internal
 import           HepMC.Parse
