@@ -1,10 +1,10 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module Data.HepMC.HeavyIonInfo where
+module HepMC.HeavyIonInfo where
 
 import Control.Lens
 
-import Data.HepMC.Parse
+import HepMC.Parse
 
 data HeavyIonInfo =
     HeavyIonInfo

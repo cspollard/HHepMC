@@ -1,4 +1,4 @@
-module Data.HepMC.Barcoded where
+module HepMC.Barcoded where
 
 import Control.Lens
 

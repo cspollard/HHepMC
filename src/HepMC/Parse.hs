@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Data.HepMC.Parse
+module HepMC.Parse
     ( fromFile
     ) where
 

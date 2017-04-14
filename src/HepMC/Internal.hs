@@ -1,6 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module Data.HepMC.Internal where
+module HepMC.Internal where
 
 import           Control.Lens
 

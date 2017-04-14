@@ -1,4 +1,4 @@
-module Data.HepMC.EventGraph where
+module HepMC.EventGraph where
 
 import           Control.Lens        hiding (children)
 
@@ -9,8 +9,8 @@ import qualified Data.Graph          as G
 import qualified Data.IntMap         as IM
 
 import qualified Data.HEP.PID        as PID
-import           Data.HepMC.Barcoded
-import           Data.HepMC.Event
+import           HepMC.Barcoded
+import           HepMC.Event
 
 
 

@@ -1,10 +1,10 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module Data.HepMC.EventInfo where
+module HepMC.EventInfo where
 
 import Control.Lens
 
-import Data.HepMC.Parse
+import HepMC.Parse
 
 data EventInfo =
     EventInfo

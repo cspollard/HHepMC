@@ -1,10 +1,10 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module Data.HepMC.PDFInfo where
+module HepMC.PDFInfo where
 
 import Control.Lens
 
-import Data.HepMC.Parse
+import HepMC.Parse
 
 data PDFInfo =
     PDFInfo

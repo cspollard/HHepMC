@@ -1,11 +1,11 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Data.HepMC.Units where
+module HepMC.Units where
 
 import Control.Lens
 
-import Data.HepMC.Parse
+import HepMC.Parse
 
 data UnitMomentum = MEV | GEV deriving (Eq, Ord, Show)
 data UnitLength = MM | CM deriving (Eq, Ord, Show)

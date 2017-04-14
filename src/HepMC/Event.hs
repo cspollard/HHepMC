@@ -1,7 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TupleSections   #-}
 
-module Data.HepMC.Event
+module HepMC.Event
     ( module X
     , Event(..)
     , eparts, everts, graph, graph'
@@ -23,10 +23,10 @@ import           Data.HEP.LorentzVector as X
 import           Data.HEP.PID
 import qualified Data.IntMap            as IM
 
-import           Data.HepMC.Barcoded
-import           Data.HepMC.EventHeader as X
-import           Data.HepMC.Internal
-import           Data.HepMC.Parse
+import           HepMC.Barcoded
+import           HepMC.EventHeader as X
+import           HepMC.Internal
+import           HepMC.Parse
 
 data Vertex =
   Vertex
