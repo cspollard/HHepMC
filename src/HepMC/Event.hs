@@ -1,10 +1,8 @@
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TemplateHaskell     #-}
 {-# LANGUAGE TupleSections       #-}
 
 module HepMC.Event
-    ( module X
-    , Event(..)
+    ( Event(..)
     , parserEvent
     , Vertex
     , vertNOrphan
@@ -16,47 +14,11 @@ module HepMC.Event
     ) where
 
 import           Control.Lens
-import           Data.Attoparsec.ByteString.Char8 as X hiding (parse)
-import           Data.HEP.LorentzVector           as X
-import           Data.HEP.PID
-import qualified Data.IntMap                      as IM
+import qualified Data.IntMap       as IM
 import           HepMC.EventGraph
-import           HepMC.EventHeader                as X
-import           HepMC.Internal
+import           HepMC.EventHeader
 import           HepMC.Parse
-
-
-
-data Vertex =
-  Vertex
-    { _vgraph :: EventGraph
-    , _rvert  :: RawVertex
-    }
-
-
-data Particle =
-  Particle
-    { _pgraph :: EventGraph
-    , _rpart  :: RawParticle
-    }
-
-makeLenses ''Vertex
-makeLenses ''Particle
-
-instance Show Vertex where
-  show = show . _rvert
-
-instance Show Particle where
-  show = show . _rpart
-
-instance HasLorentzVector Vertex where
-  toXYZT = rvert . rvertXYZT
-
-instance HasLorentzVector Particle where
-  toXYZT = rpart . rpartXYZT
-
-instance HasPID Particle where
-  pid = rpart . rpartPID
+import           HepMC.Particle
 
 
 data Event =
@@ -65,34 +27,6 @@ data Event =
     , vertices  :: [Vertex]
     , header    :: EventHeader
     }
-
-
-vertNOrphan :: Lens' Vertex Int
-vertNOrphan = rvert . rvertNOrphan
-
-vertNOutgoing :: Lens' Vertex Int
-vertNOutgoing = rvert . rvertNOutgoing
-
-vertWeights :: Lens' Vertex (Vector Double)
-vertWeights = rvert . rvertWeights
-
-
-partM :: Lens' Particle Double
-partM = rpart . rpartM
-
-partStatus :: Lens' Particle Int
-partStatus = rpart . rpartStatus
-
-partPolarizationTheta :: Lens' Particle Double
-partPolarizationTheta = rpart . rpartPolarizationTheta
-
-partPolarizationPhi :: Lens' Particle Double
-partPolarizationPhi = rpart . rpartPolarizationPhi
-
-partFlows :: Lens' Particle (Vector (Int, Int))
-partFlows = rpart . rpartFlows
-
-
 
 parserEvent :: Parser Event
 parserEvent = do
