@@ -4,59 +4,44 @@
 
 module HepMC.Event
     ( module X
-    , Event
-    , eparts, everts, graph, graph'
+    , Event(..)
     , parserEvent
     , Vertex
-    , vertID, vertNOrphan
+    , vertNOrphan
     , vertNOutgoing, vertWeights
-    , vevent
     , Particle
     , partM, partStatus
     , partPolarizationTheta, partPolarizationPhi
-    , partFlows, pevent
+    , partFlows
     ) where
 
 import           Control.Lens
 import           Data.Attoparsec.ByteString.Char8 as X hiding (parse)
-import qualified Data.Graph                       as G
 import           Data.HEP.LorentzVector           as X
 import           Data.HEP.PID
 import qualified Data.IntMap                      as IM
-import qualified Data.Map.Strict                  as M
-import           Data.Text                        (Text)
-import           HepMC.Barcoded
+import           HepMC.EventGraph
 import           HepMC.EventHeader                as X
 import           HepMC.Internal
 import           HepMC.Parse
 
+
+
 data Vertex =
   Vertex
-    { _vevent :: Event
+    { _vgraph :: EventGraph
     , _rvert  :: RawVertex
     }
 
 
 data Particle =
   Particle
-    { _pevent :: Event
+    { _pgraph :: EventGraph
     , _rpart  :: RawParticle
     }
 
-
-data Event =
-  Event
-    { _evtparts  :: IM.IntMap Particle
-    , _evtverts  :: IM.IntMap Vertex
-    , _evtgraph  :: G.Graph
-    , _evtgraph' :: G.Graph
-    , _evtheader :: EventHeader
-    }
-
-
 makeLenses ''Vertex
 makeLenses ''Particle
-makeLenses ''Event
 
 instance Show Vertex where
   show = show . _rvert
@@ -72,6 +57,14 @@ instance HasLorentzVector Particle where
 
 instance HasPID Particle where
   pid = rpart . rpartPID
+
+
+data Event =
+  Event
+    { particles :: [Particle]
+    , vertices  :: [Vertex]
+    , header    :: EventHeader
+    }
 
 
 vertNOrphan :: Lens' Vertex Int
@@ -101,67 +94,11 @@ partFlows = rpart . rpartFlows
 
 
 
-
--- parse the vertex barcode and the vertex.
-parseRawVertex :: Parser ((Int, RawVertex), [Int] -> [(Int, Int)])
-parseRawVertex =
-  flip (<?>) "parseRawVertex" $ do
-    char 'V' >> skipSpace
-    vbc <- signed decimal <* skipSpace <?> "rvertBC"
-    v <-
-      RawVertex vbc
-        <$> (signed decimal <* skipSpace <?> "rvertID")
-        <*> (xyzt <* skipSpace <?> "rvertXYZT")
-        <*> (decimal <* skipSpace <?> "rvertNOrphan")
-        <*> (decimal <* skipSpace <?> "rvertNOutgoing")
-        <*> (vector double <* endOfLine <?> "rvertWeights")
-
-    return ((vbc, v), fmap (vbc,))
-
-
-parseRawParticle :: Parser ((Int, RawParticle), [(Int, Int)])
-parseRawParticle =
-  flip (<?>) "parseRawParticle" $ do
-    char 'P' >> skipSpace
-    pbc <- signed decimal <* skipSpace <?> "rpartBC"
-    p <-
-      RawParticle pbc
-        <$> (signed decimal <* skipSpace <?> "rpartPID")
-        <*> (xyzt <* skipSpace <?> "rpartXYZT")
-        <*> (double <* skipSpace <?> "rpartM")
-        <*> (signed decimal <* skipSpace <?> "rpartStatus")
-        <*> (double <* skipSpace <?> "rpartPolarizationTheta")
-        <*> (double <* skipSpace <?> "rpartPolarizationPhi")
-
-    vbc <- signed decimal <* skipSpace <?> "rpartVertexBC"
-    p' <-
-      p <$> vector (tuple (signed decimal) (signed decimal)) <* endOfLine
-        <?> "rpartFlows"
-    return ((pbc, p'), if vbc == 0 then [] else [(pbc, vbc)])
-
-
 parserEvent :: Parser Event
 parserEvent = do
   eh <- parserEventHeader
-  (vs, pps, ees) <-
-    fmap unzip3 <$> many $ do
-      (v, vef) <- parseRawVertex
-      (ps, pes) <- unzip <$> many parseRawParticle
-      let ves = vef $ fst <$> ps
-      return (v, ps, ves++concat pes)
+  eg <- parserEventGraph
+  let ps = Particle eg <$> IM.elems (view rawparts eg)
+      vs = Vertex eg <$> IM.elems (view rawverts eg)
 
-  let ps = concat pps
-      rparts = IM.fromList ps
-      rverts = IM.fromList vs
-
-      is = fmap fst vs ++ fmap fst ps
-      mx = maximum is
-      mn = minimum is
-      g = G.buildG (mn, mx) $ concat ees
-      g' = G.transposeG g
-
-      partmap = Particle evt <$> rparts
-      vertmap = Vertex evt <$> rverts
-      evt = Event partmap vertmap g g'
-
-  return evt
+  return $ Event ps vs eh
