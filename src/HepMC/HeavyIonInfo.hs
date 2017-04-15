@@ -20,13 +20,13 @@ data HeavyIonInfo =
     , _eventPlaneAzimuth  :: Double
     , _nucleonEccent      :: Double
     , _inelastCrossSec    :: Double
-    } deriving Show
+    }
 
 makeLenses ''HeavyIonInfo
 
 
 parserHeavyIonInfo :: Parser HeavyIonInfo
-parserHeavyIonInfo = do
+parserHeavyIonInfo =
   HeavyIonInfo
     <$> decimal <* skipSpace
     <*> decimal <* skipSpace

@@ -40,15 +40,17 @@ import           System.IO
 
 hmcevt
   :: Monad m
-  => P.Producer ByteString m x
-  -> P.Producer [ByteString] m (PA.ParsingError, P.Producer ByteString m x)
+  -> PP.Parser ByteString m (Either PA.ParsingError [ByteString])
 hmcevt p = do
   (_, (e, p')) <-
     lift
     $ P.fold' (flip $ uncurry M.insert) mempty id
-      $ hepmcevtheader p
+      $ PP.parsed hmcevtheaderline p
 
-  (bs, p'') <- runStateT go p'
+  (bs, p'') <- do
+    (ev, q) <- lift $ runStateT hmcvtx p'
+    case ev of
+
   hmcevent p''
 
   where
@@ -68,10 +70,10 @@ hmcpart = parseOne $ do
   char 'P' *> skipSpace
   takeTill eol <* endOfLine
 
-hmcevtheader
+hmcevtheaderline
   :: Monad m
   => PP.Parser ByteString m (Either PA.ParsingError (HeaderInfo, ByteString))
-hmcevtheader = parseOne evtHeaderLine
+hmcevtheaderline = parseOne evtHeaderLine
 
 
 

@@ -1,20 +1,22 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell   #-}
 
-module HepMC.Units where
+module HepMC.Units
+  ( Units, unitMomentum, unitLength
+  , parserUnits
+  ) where
 
 import           Control.Lens
-
 import           HepMC.Parse
 
 data UnitMomentum = MEV | GEV deriving (Eq, Ord, Show)
 data UnitLength = MM | CM deriving (Eq, Ord, Show)
 
 data Units =
-    Units
-        { _unitMomentum :: UnitMomentum
-        , _unitLength   :: UnitLength
-        } deriving Show
+  Units
+    { _unitMomentum :: UnitMomentum
+    , _unitLength   :: UnitLength
+    }
 
 makeLenses ''Units
 

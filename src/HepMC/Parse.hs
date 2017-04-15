@@ -1,26 +1,30 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings     #-}
 
 module HepMC.Parse
   ( module X
   , tuple, vector, eol
-  , hmcvers, hmcend, evtHeaderLine
-  , HeaderInfo(..)
+  , hmcvers, hmcend
+  , xyzt
   ) where
 
-import           Control.Applicative              as X ((<|>))
+import           Control.Applicative              as X (many, (<|>))
 import           Control.Applicative              (liftA2)
+import           Control.Monad                    as X (void)
 import           Data.Attoparsec.ByteString.Char8 as X hiding (parse)
 import           Data.ByteString                  (ByteString)
-import qualified Data.Vector.Generic              as V
+import           Data.HEP.LorentzVector
+import           Data.Vector                      as X (Vector)
+import           Data.Vector
 
 
 tuple :: Applicative f => f a -> f b -> f (a, b)
 tuple = liftA2 (,)
 
-vector :: V.Vector v a => Parser a -> Parser (v a)
+vector :: Parser a -> Parser (Vector a)
 vector p = do
   n <- decimal <* skipSpace
-  V.replicateM n p
+  replicateM n p
 
 eol :: Char -> Bool
 eol = isEndOfLine . toEnum . fromEnum
@@ -44,11 +48,10 @@ hmcend = do
   return "end"
 
 
-data HeaderInfo = C | E | F | H | N | U deriving (Eq, Ord, Show, Read)
-
-
-evtHeaderLine :: Parser (HeaderInfo, ByteString)
-evtHeaderLine = do
-  hi <- read . pure <$> satisfy (inClass "CEFHNU")
-  bs <- skipSpace *> takeTill eol <* endOfLine
-  return (hi, bs)
+xyzt :: Parser XYZT
+xyzt =
+  XYZT
+    <$> double <* skipSpace
+    <*> double <* skipSpace
+    <*> double <* skipSpace
+    <*> double

@@ -7,25 +7,24 @@ import           Data.Vector  (Vector)
 import           HepMC.Parse
 
 data EventInfo =
-    EventInfo
-        { _eventNumber     :: Int
-        , _nMultPartInts   :: Int
-        , _eventScale      :: Double
-        , _alphaQCD        :: Double
-        , _alphaQED        :: Double
-        , _signalProcessID :: Int
-        , _signalProcessBC :: Int
-        , _nVertices       :: Int
-        , _beamParticleBCs :: (Int, Int)
-        , _rndmStateInts   :: Vector Int
-        , _eventWeights    :: Vector Double
-        } deriving (Eq, Ord, Show)
+  EventInfo
+    { _eventNumber     :: Int
+    , _nMultPartInts   :: Int
+    , _eventScale      :: Double
+    , _alphaQCD        :: Double
+    , _alphaQED        :: Double
+    , _signalProcessID :: Int
+    , _signalProcessBC :: Int
+    , _nVertices       :: Int
+    , _beamParticleBCs :: (Int, Int)
+    , _rndmStateInts   :: Vector Int
+    , _eventWeights    :: Vector Double
+    }
 
 makeLenses ''EventInfo
 
-
 parserEventInfo :: Parser EventInfo
-parserEventInfo = do
+parserEventInfo =
     EventInfo
         <$> decimal <* skipSpace
         <*> decimal <* skipSpace

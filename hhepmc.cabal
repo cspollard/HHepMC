@@ -19,11 +19,13 @@ cabal-version:       >=1.10
 
 library
   exposed-modules:    HepMC.Barcoded
+                    , HepMC.CrossSection
                     , HepMC.Event
                     , HepMC.EventGraph
                     , HepMC.EventInfo
                     , HepMC.HeavyIonInfo
                     , HepMC.Parse
+                    , HepMC.Pipes
                     , HepMC.PDFInfo
                     , HepMC.Units
   other-modules:      HepMC.Internal
@@ -35,6 +37,7 @@ library
   build-depends:      base == 4.9.*
                     , lens == 4.15.*
                     , bytestring == 0.10.*
+                    , text == 1.2.*
                     , array == 0.5.*
                     , containers == 0.5.*
                     , attoparsec == 0.13.*
