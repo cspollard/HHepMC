@@ -16,7 +16,7 @@ data PDFInfo =
     , _pdfXfx2   :: Double
     , _pdfSetID1 :: Int
     , _pdfSetID2 :: Int
-    }
+    } deriving Show
 
 makeLenses ''PDFInfo
 

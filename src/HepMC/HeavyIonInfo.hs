@@ -20,7 +20,7 @@ data HeavyIonInfo =
     , _eventPlaneAzimuth  :: Double
     , _nucleonEccent      :: Double
     , _inelastCrossSec    :: Double
-    }
+    } deriving Show
 
 makeLenses ''HeavyIonInfo
 

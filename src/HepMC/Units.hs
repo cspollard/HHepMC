@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell   #-}
 
 module HepMC.Units
   ( Units, unitMomentum, unitLength
@@ -12,22 +11,21 @@ import           HepMC.Parse
 data UnitMomentum = MEV | GEV deriving (Eq, Ord, Show)
 data UnitLength = MM | CM deriving (Eq, Ord, Show)
 
-data Units =
-  Units
-    { _unitMomentum :: UnitMomentum
-    , _unitLength   :: UnitLength
-    }
+type Units = (UnitMomentum, UnitLength)
 
-makeLenses ''Units
+unitMomentum :: Lens' Units UnitMomentum
+unitMomentum = _1
 
+unitLength :: Lens' Units UnitLength
+unitLength = _2
 
 unitP :: Parser UnitMomentum
-unitP = string "MEV" *> return MEV <|>
-            string "GEV" *> return GEV
+unitP =
+  string "MEV" *> return MEV <|> string "GEV" *> return GEV
 
 unitL :: Parser UnitLength
-unitL = string "MM" *> return MM <|>
-            string "CM" *> return CM
+unitL =
+  string "MM" *> return MM <|> string "CM" *> return CM
 
 parserUnits :: Parser Units
-parserUnits = Units <$> (unitP <* skipSpace) <*> (unitL <* skipSpace)
+parserUnits = tuple (unitP <* skipSpace) (unitL <* skipSpace)

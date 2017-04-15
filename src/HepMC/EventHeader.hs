@@ -9,6 +9,7 @@ module HepMC.EventHeader
 
 import           Control.Lens
 import           Data.Text          (Text)
+import           Debug.Trace
 import           HepMC.CrossSection as X
 import           HepMC.EventInfo    as X
 import           HepMC.HeavyIonInfo as X
@@ -26,7 +27,7 @@ data EventHeader =
     , _crossSection :: Maybe CrossSectionInfo
     , _heavyIonInfo :: Maybe HeavyIonInfo
     , _pdfInfo      :: Maybe PDFInfo
-    }
+    } deriving Show
 
 makeLenses ''EventHeader
 
@@ -37,13 +38,14 @@ data HeaderInfo =
   | H HeavyIonInfo
   | N WeightNames
   | U Units
+  deriving Show
 
 makePrisms ''HeaderInfo
 
 
 evtHeaderLine :: Parser HeaderInfo
 evtHeaderLine = do
-  hi <- anyChar
+  hi <- satisfy (inClass "CEFHNU") <* skipSpace
   case hi of
     'C' -> C <$> parserCrossSectionInfo
     'E' -> E <$> parserEventInfo
@@ -56,7 +58,7 @@ evtHeaderLine = do
 
 parserEventHeader :: Parser EventHeader
 parserEventHeader = do
-  hls <- many evtHeaderLine
+  hls <- many1 evtHeaderLine
   evtinfo <-
     maybe (fail "missing event info!") return
     $ hls ^? traverse . _E

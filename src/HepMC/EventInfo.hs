@@ -19,7 +19,7 @@ data EventInfo =
     , _beamParticleBCs :: (Int, Int)
     , _rndmStateInts   :: Vector Int
     , _eventWeights    :: Vector Double
-    }
+    } deriving Show
 
 makeLenses ''EventInfo
 
@@ -27,7 +27,7 @@ parserEventInfo :: Parser EventInfo
 parserEventInfo =
     EventInfo
         <$> decimal <* skipSpace
-        <*> decimal <* skipSpace
+        <*> signed decimal <* skipSpace
         <*> double <* skipSpace
         <*> double <* skipSpace
         <*> double <* skipSpace

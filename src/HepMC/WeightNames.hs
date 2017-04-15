@@ -7,4 +7,4 @@ type WeightNames = Vector Text
 
 parserWeightNames :: Parser WeightNames
 parserWeightNames =
-  vector (fmap pack $ many1 letter_ascii <* skipSpace)
+  vector (fmap pack $ many1 (satisfy $ not . isSpace) <* skipSpace)

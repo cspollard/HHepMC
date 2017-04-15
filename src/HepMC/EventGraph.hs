@@ -2,6 +2,7 @@
 
 module HepMC.EventGraph where
 
+import Debug.Trace
 import           Control.Lens   hiding (children)
 import qualified Data.Graph     as G
 import qualified Data.IntMap    as IM
@@ -22,9 +23,9 @@ makeLenses ''EventGraph
 parserEventGraph :: Parser EventGraph
 parserEventGraph = do
   (vs, pps, ees) <-
-    fmap unzip3 <$> many $ do
+    fmap unzip3 <$> many1 $ do
       (v, vef) <- parseRawVertex
-      (ps, pes) <- unzip <$> many parseRawParticle
+      (ps, pes) <- traceShow v $ unzip <$> many1 parseRawParticle
       let ves = vef $ fst <$> ps
       return (v, ps, ves++concat pes)
 

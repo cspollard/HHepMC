@@ -60,7 +60,7 @@ instance Ord RawParticle where
 parseRawVertex :: Parser ((Int, RawVertex), [Int] -> [(Int, Int)])
 parseRawVertex =
   flip (<?>) "parseRawVertex" $ do
-    char 'V' >> skipSpace
+    char 'V' *> skipSpace
     vbc <- signed decimal <* skipSpace <?> "rvertBC"
     v <-
       RawVertex vbc
@@ -68,7 +68,7 @@ parseRawVertex =
         <*> (xyzt <* skipSpace <?> "rvertXYZT")
         <*> (decimal <* skipSpace <?> "rvertNOrphan")
         <*> (decimal <* skipSpace <?> "rvertNOutgoing")
-        <*> (vector double <* endOfLine <?> "rvertWeights")
+        <*> (vector (double <* skipSpace) <?> "rvertWeights")
 
     return ((vbc, v), fmap (vbc,))
 
@@ -89,6 +89,9 @@ parseRawParticle =
 
     vbc <- signed decimal <* skipSpace <?> "rpartVertexBC"
     p' <-
-      p <$> vector (tuple (signed decimal) (signed decimal)) <* endOfLine
-        <?> "rpartFlows"
+      p
+      <$> vector
+          (tuple (signed decimal <* skipSpace) (signed decimal <* skipSpace))
+      <?> "rpartFlows"
+
     return ((pbc, p'), if vbc == 0 then [] else [(pbc, vbc)])
