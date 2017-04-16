@@ -58,7 +58,7 @@ evtHeaderLine = do
 
 parserEventHeader :: Parser EventHeader
 parserEventHeader = do
-  hls <- many1 evtHeaderLine
+  hls <- traceShowId <$> many1 evtHeaderLine
   evtinfo <-
     maybe (fail "missing event info!") return
     $ hls ^? traverse . _E

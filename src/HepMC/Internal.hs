@@ -7,6 +7,7 @@ import           Control.Lens
 import           Data.HEP.LorentzVector
 import           Data.HEP.PID
 import           Data.Vector
+import           Debug.Trace
 import           HepMC.Barcoded
 import           HepMC.Parse
 
@@ -61,7 +62,7 @@ parseRawVertex :: Parser ((Int, RawVertex), [Int] -> [(Int, Int)])
 parseRawVertex =
   flip (<?>) "parseRawVertex" $ do
     char 'V' *> skipSpace
-    vbc <- signed decimal <* skipSpace <?> "rvertBC"
+    vbc <- traceShowId <$> signed decimal <* skipSpace <?> "rvertBC"
     v <-
       RawVertex vbc
         <$> (signed decimal <* skipSpace <?> "rvertID")

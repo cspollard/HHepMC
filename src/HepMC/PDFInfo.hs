@@ -23,8 +23,8 @@ makeLenses ''PDFInfo
 parserPDFInfo :: Parser PDFInfo
 parserPDFInfo =
   PDFInfo
-    <$> decimal <* skipSpace
-    <*> decimal <* skipSpace
+    <$> signed decimal <* skipSpace
+    <*> signed decimal <* skipSpace
     <*> double <* skipSpace
     <*> double <* skipSpace
     <*> double <* skipSpace
