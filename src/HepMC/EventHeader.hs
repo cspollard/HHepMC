@@ -9,7 +9,6 @@ module HepMC.EventHeader
 
 import           Control.Lens
 import           Data.Text          (Text)
-import           Debug.Trace
 import           HepMC.CrossSection as X
 import           HepMC.EventInfo    as X
 import           HepMC.HeavyIonInfo as X
@@ -58,7 +57,7 @@ evtHeaderLine = do
 
 parserEventHeader :: Parser EventHeader
 parserEventHeader = do
-  hls <- traceShowId <$> many1 evtHeaderLine
+  hls <- many1 evtHeaderLine
   evtinfo <-
     maybe (fail "missing event info!") return
     $ hls ^? traverse . _E

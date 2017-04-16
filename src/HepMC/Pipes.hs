@@ -2,7 +2,6 @@
 
 module HepMC.Pipes where
 
-import           Control.Monad          (void)
 import           Control.Monad.IO.Class
 import           Control.Monad.Trans
 import           Data.ByteString        (ByteString)
@@ -12,7 +11,6 @@ import           HepMC.Parse
 import           Pipes
 import qualified Pipes.Attoparsec       as PA
 import qualified Pipes.Parse            as PP
-import qualified Pipes.Prelude          as P
 
 -- TODO
 -- this doesn't exit cleanly....
@@ -22,15 +20,15 @@ fromStream p = do
   case evers of
     Left s  -> liftIO $ print s
     Right v -> do
-      liftIO . print $ "hepmc version: " ++ show v
-      ex <- PA.parsed parserEvent $ f p'
+      liftIO . putStrLn $ "hepmc version: " ++ show v
+      ex <- PA.parsed parserEvent p'
       case ex of
         Right _         -> liftIO $ print "no hepmc footer?!"
-        Left (exx, p'') -> do
-          liftIO $ print exx
-          void . lift $ PP.runStateT (parseOne hmcend) (f p'')
-
-    where f q = q >-> P.mapM (\x -> liftIO (print x) >> return x)
+        Left (_, p'') -> do
+          (exxx, _) <- lift $ PP.runStateT (parseOne hmcend) p''
+          case exxx of
+            Right _ -> liftIO $ putStrLn "finished."
+            Left x  -> liftIO $ print x
 
 
 parseOne

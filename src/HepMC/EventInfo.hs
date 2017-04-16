@@ -27,12 +27,14 @@ parserEventInfo :: Parser EventInfo
 parserEventInfo =
     EventInfo
         <$> decimal <* skipSpace
+        -- TODO
+        -- why is num mpis negative sometimes?
         <*> signed decimal <* skipSpace
         <*> double <* skipSpace
         <*> double <* skipSpace
         <*> double <* skipSpace
-        <*> decimal <* skipSpace
-        <*> decimal <* skipSpace
+        <*> signed decimal <* skipSpace
+        <*> signed decimal <* skipSpace
         <*> decimal <* skipSpace
         <*> tuple (decimal <* skipSpace) (decimal <* skipSpace)
         <*> vector (decimal <* skipSpace)
