@@ -17,15 +17,19 @@ main = do
   fname <- head <$> getArgs
   withFile fname ReadMode $ \f ->
     P.runEffect
-    $ fromStream (PB.fromHandle f) >-> P.map particles >-> P.print
+    $ fromStream (PB.fromHandle f)
+      >-> P.map (length . filter finalB . particles)
+      >-> P.print
 
 
--- finalWith :: (Particle -> Bool) -> Particle -> Bool
--- finalWith f p = f p && (not . any f $ toListOf children p)
---
---
--- ewDecay :: Particle -> Bool
--- ewDecay =
---   or
---     . traverse finalWith
---       (classOf <$> [bottomHadron, charmHadron, tau, anti tau])
+finalWith :: (Particle -> Bool) -> Particle -> Bool
+finalWith f p = f p && not (anyOf children f p)
+
+finalB :: Particle -> Bool
+finalB = finalWith $ classOf bottomHadron
+
+ewDecay :: Particle -> Bool
+ewDecay =
+  or
+  . traverse finalWith
+    (classOf <$> [bottomHadron, charmHadron, tau, anti tau])

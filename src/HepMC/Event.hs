@@ -2,15 +2,9 @@
 {-# LANGUAGE TupleSections       #-}
 
 module HepMC.Event
-    ( Event(..)
+    ( module X
+    , Event(..)
     , parserEvent
-    , Vertex
-    , vertNOrphan
-    , vertNOutgoing, vertWeights
-    , Particle
-    , partM, partStatus
-    , partPolarizationTheta, partPolarizationPhi
-    , partFlows
     ) where
 
 import           Control.Lens
@@ -18,7 +12,7 @@ import qualified Data.IntMap       as IM
 import           HepMC.EventGraph
 import           HepMC.EventHeader
 import           HepMC.Parse
-import           HepMC.Particle
+import           HepMC.Particle    as X
 
 
 data Event =
