@@ -38,6 +38,6 @@ parserHeavyIonInfo =
     <*> decimal <* skipSpace
     <*> decimal <* skipSpace
     <*> double <* skipSpace
-    <*> double <* skipSpace
+    <*> signed double <* skipSpace
     <*> double <* skipSpace
     <*> double <* skipSpace
